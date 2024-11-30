@@ -14,21 +14,12 @@ export async function createServer(): Promise<Application> {
   app.get("/api/greet", async (req: Request, res: Response): Promise<void> => {
     res.json({ message: "Hello, welcome to our API!" });
   });
-  // Simulated constantly changing data
-  let data = {
-    value: Math.random(), // Initial data
-  };
 
-  // Update the data periodically
-  setInterval(() => {
-    data.value = Math.random();
-  }, 1000); // Update every second
-
-  app.get("/status", (req, res) => {
-    res.render("status", { data }); // Pass the current data to the template
+  app.get("/status", async (req, res) => {
+    const metrostatus = await status();
+    res.render("status", { metrostatus });
   });
 
-  // Example POST endpoint with async handler
   app.post(
     "/api/status",
     async (req: Request, res: Response): Promise<void> => {
