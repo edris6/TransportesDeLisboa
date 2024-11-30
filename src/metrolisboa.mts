@@ -98,7 +98,7 @@ async function requestFromMetroStatus(
 export async function status(): Promise<Record<string, string> | string> {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  console.log(key);
+  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetroStatus(
       url,

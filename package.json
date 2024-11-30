@@ -12,9 +12,11 @@
   "type": "module",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.21.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^22.10.1",
     "@types/node-fetch": "^2.6.12",
     "@typescript-eslint/parser": "^5.62.0",
