@@ -8,9 +8,24 @@ export async function createServer(): Promise<Application> {
   // Middleware to parse JSON bodies
   app.use(express.json());
 
+  app.set("view engine", "ejs");
+
   // Example GET endpoint
   app.get("/api/greet", async (req: Request, res: Response): Promise<void> => {
     res.json({ message: "Hello, welcome to our API!" });
+  });
+  // Simulated constantly changing data
+  let data = {
+    value: Math.random(), // Initial data
+  };
+
+  // Update the data periodically
+  setInterval(() => {
+    data.value = Math.random();
+  }, 1000); // Update every second
+
+  app.get("/status", (req, res) => {
+    res.render("status", { data }); // Pass the current data to the template
   });
 
   // Example POST endpoint with async handler
