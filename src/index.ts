@@ -1,7 +1,10 @@
 import { status } from './metrolisboa.mjs';
 
-async function main(): Promise<void> {
-  console.log(await status());
+async function MetroStatus():  Promise<Record<string, string> | string> {
+  let status_: Record<string, string> | string =  await status()
+  if (status_ == "oops"){
+    throw new Error()
+  }
 }
 
-main();
+MetroStatus();

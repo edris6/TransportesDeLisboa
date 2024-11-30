@@ -51,8 +51,10 @@ async function generatekey(): Promise<string | undefined> {
     const s: unknown = await response.json();
     
     if (response.ok) {
+      //@ts-ignore
       return s.access_token; // Properly returning the access token
     } else {
+      //@ts-ignore
       throw new Error(`Error getting token: ${s.error}`);
     }
   } catch (error) {
@@ -96,14 +98,20 @@ async function requestFromMetroStatus(
 }
 
 export async function status(): Promise<Record<string, string> | string> {
- 
-  const key = await generatekey()
+ //@ts-ignore
+  const key: Promise<string | undefined> = await generatekey()
   console.log(key)
+  if (typeof(key) == 'string'){
+    
+  
   const response = await requestFromMetroStatus(url, "estadoLinha/todos", key);
   if (response && response.codigo == 200) {
     const { amarela, verde, azul, vermelha } = response.resposta;
     return { amarela, verde, azul, vermelha };
   } else {
-    return "oops";
+    throw new Error(`json not in valid format`);
   }
+ } else {
+   throw new Error(`Key not working`);
+ }
 }
