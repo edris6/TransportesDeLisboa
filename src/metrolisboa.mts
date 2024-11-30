@@ -1,7 +1,7 @@
-import fetch, { Response } from 'node-fetch';
-import https from 'https';
+import fetch, { Response } from "node-fetch";
+import https from "https";
 import countryTable from "../master-key.json" with { type: "json" };
-import { URLSearchParams } from 'url';
+import { URLSearchParams } from "url";
 
 const url = "https://api.metrolisboa.pt:8243/estadoServicoML/1.0.1/";
 
@@ -21,14 +21,13 @@ interface MetroResponseStatus {
   expires_in: number
 }*/
 
-
 async function generatekey(): Promise<string | undefined> {
   const credentials = `${countryTable.consumer_key}:${countryTable.consumer_secret}`;
-  const encodedCredentials = Buffer.from(credentials).toString('base64');
-  const url = 'https://api.metrolisboa.pt:8243/token';
+  const encodedCredentials = Buffer.from(credentials).toString("base64");
+  const url = "https://api.metrolisboa.pt:8243/token";
 
   const data = new URLSearchParams({
-    grant_type: 'client_credentials'
+    grant_type: "client_credentials",
   });
 
   const agent = new https.Agent({
@@ -36,20 +35,20 @@ async function generatekey(): Promise<string | undefined> {
   });
 
   const headers = {
-    'Authorization': 'Basic ' + encodedCredentials,
-    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization: "Basic " + encodedCredentials,
+    "Content-Type": "application/x-www-form-urlencoded",
   };
 
   try {
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       body: data.toString(),
       headers: headers,
       agent: agent,
     });
 
     const s: unknown = await response.json();
-    
+
     if (response.ok) {
       //@ts-ignore
       return s.access_token; // Properly returning the access token
@@ -58,26 +57,25 @@ async function generatekey(): Promise<string | undefined> {
       throw new Error(`Error getting token: ${s.error}`);
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
     return undefined; // Return undefined in case of error
   }
 }
 
-
 async function requestFromMetroStatus(
   urls: string = url,
   location: string,
-  key: string
+  key: string,
 ): Promise<MetroResponseStatus | undefined> {
   const agent = new https.Agent({
     rejectUnauthorized: false,
   });
 
   const options = {
-    method: 'GET',
+    method: "GET",
     headers: {
-      accept: 'application/json',
-      Authorization: 'Bearer ' + key,
+      accept: "application/json",
+      Authorization: "Bearer " + key,
     },
     agent: agent,
   };
@@ -92,26 +90,28 @@ async function requestFromMetroStatus(
     const data: any = await response.json();
     return data;
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
     return undefined;
   }
 }
 
 export async function status(): Promise<Record<string, string> | string> {
- //@ts-ignore
-  const key: Promise<string | undefined> = await generatekey()
-  console.log(key)
-  if (typeof(key) == 'string'){
-    
-  
-  const response = await requestFromMetroStatus(url, "estadoLinha/todos", key);
-  if (response && response.codigo == 200) {
-    const { amarela, verde, azul, vermelha } = response.resposta;
-    return { amarela, verde, azul, vermelha };
+  //@ts-ignore
+  const key: Promise<string | undefined> = await generatekey();
+  console.log(key);
+  if (typeof key == "string") {
+    const response = await requestFromMetroStatus(
+      url,
+      "estadoLinha/todos",
+      key,
+    );
+    if (response && response.codigo == 200) {
+      const { amarela, verde, azul, vermelha } = response.resposta;
+      return { amarela, verde, azul, vermelha };
+    } else {
+      throw new Error(`json not in valid format`);
+    }
   } else {
-    throw new Error(`json not in valid format`);
+    throw new Error(`Key not working`);
   }
- } else {
-   throw new Error(`Key not working`);
- }
 }
