@@ -15,23 +15,25 @@ export async function createServer(): Promise<Application> {
     res.json({ message: "Hello, welcome to our API!" });
   });
 
-  app.get("/status", async (req, res) => {
+  app.get("/metrolisboa", async (req, res) => {
     const metrostatus = await status();
-    res.render("status", { metrostatus });
+    res.render("metrolisboa", { metrostatus });
   });
 
   app.post(
-    "/api/status",
+    "/api/metro/status",
     async (req: Request, res: Response): Promise<void> => {
       const { data } = req.body;
-
-      if (!data) {
+      //IMPORTANT: NEEDS WORKING
+      if (data.code != "123") {
         //@ts-ignore
-        return res.status(400).json({ error: "No data provided" });
+        return res.status(401).json({ error: "Wrong password" });
+      } else if (!data) {
+        //@ts-ignore
+        return res.status(401).json({ error: "No password required" });
       }
 
       try {
-        // Assuming you're awaiting the result of some async function
         const metrostatus = await status();
         res.json(metrostatus);
       } catch (error) {
