@@ -4,6 +4,7 @@ import {
   timeforstation,
   available_stations_request,
 } from "./metrolisboa.mjs";
+import cors from "cors";
 const print = console.log;
 const available_station: Set<string> = await available_stations();
 interface StationData {
@@ -28,6 +29,7 @@ export async function createServer(): Promise<Application> {
 
   // Middleware to parse JSON bodies
   app.use(express.json());
+  app.use(cors());
 
   app.set("view engine", "ejs");
 
@@ -67,8 +69,8 @@ export async function createServer(): Promise<Application> {
   app.post(
     "/api/metro/timeforstation",
     async (req: Request, res: Response): Promise<void> => {
-      const { data } = req.body;
-      print(data);
+      const data = req.body;
+      print(req.body);
       if (!data) {
         //@ts-ignore
         return res.status(400).json({ error: "I need station" });
