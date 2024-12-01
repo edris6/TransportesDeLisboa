@@ -30,7 +30,7 @@ export async function createServer(): Promise<Application> {
         return res.status(401).json({ error: "Wrong password" });
       } else if (!data) {
         //@ts-ignore
-        return res.status(401).json({ error: "No password required" });
+        return res.status(401).json({ error: "No password inputed" });
       }
 
       try {
