@@ -4,7 +4,10 @@ import {
   timeforstation,
   available_stations_request,
 } from "./metrolisboa.mjs";
+//@ts-ignorec
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 const print = console.log;
 const available_station: Set<string> = await available_stations();
 interface StationData {
@@ -27,12 +30,13 @@ function validateStationData(data: StationData): boolean {
 export async function createServer(): Promise<Application> {
   const app: Application = express();
 
-  // Middleware to parse JSON bodies
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   app.use(express.json());
   app.use(cors());
-
   app.set("view engine", "ejs");
-
+  app.set("views", path.join(__dirname, "..", "views"));
+  app.use(express.static(path.join(__dirname, "..", "public")));
   // Example GET endpoint
   app.get("/api/greet", async (req: Request, res: Response): Promise<void> => {
     res.json({ message: "Hello, welcome to our API!" });
