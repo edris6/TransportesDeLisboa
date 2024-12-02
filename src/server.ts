@@ -9,17 +9,17 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 const print = console.log;
-const available_station: Set<string> = await available_stations();
+const available_station: Array<string> = await available_stations();
 interface StationData {
   station: string;
 }
-async function available_stations(): Promise<Set<string>> {
-  let final = new Set([]);
+async function available_stations(): Promise<Array<string>> {
+  let final: Array<string> = [];
   const data = await available_stations_request();
   //@ts-ignore
   for (let i = 0; i < Object.keys(data).length; i++) {
     //@ts-ignore
-    final.add(data[i].stop_id);
+    final.push(data[i].stop_id);
   }
   return final;
 }
@@ -44,7 +44,7 @@ export async function createServer(): Promise<Application> {
 
   app.get("/metrolisboa", async (req, res) => {
     const metrostatus = await status();
-    res.render("metrolisboa", { metrostatus });
+    res.render("metrolisboa", { metrostatus, available_station });
   });
 
   app.post(
@@ -74,7 +74,7 @@ export async function createServer(): Promise<Application> {
     "/api/metro/timeforstation",
     async (req: Request, res: Response): Promise<void> => {
       const data = req.body;
-      print(req.body);
+      //print(req.body);
       if (!data) {
         //@ts-ignore
         return res.status(400).json({ error: "I need station" });
@@ -85,7 +85,7 @@ export async function createServer(): Promise<Application> {
           .status(400)
           .json({ error: "Wrong data structure or station is not a string" });
       }
-      if (available_station.has(data.station) == false) {
+      if (available_station.includes(data.station) == false) {
         //@ts-ignore
         return res.status(400).json({ error: "Station doesnt exist" });
       }
