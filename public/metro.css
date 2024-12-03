@@ -104,3 +104,16 @@ body {
     float: none;
   }
 }
+
+.container {
+  display: flex; /* Enable Flexbox */
+  gap: 20px; /* Adjust space between items. Use px, rem, or other units */
+  justify-content: space-between; /* Optional: evenly space out the items across the container */
+  align-items: flex-start; /* Align items at the top of the container */
+}
+
+.item {
+  flex: 1; /* Makes the items flexible and adjust according to the available space */
+  padding: 10px; /* Optional: Adds padding inside each item */
+  border: 1px solid #ccc; /* Optional: adds border around each item */
+}
