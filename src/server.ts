@@ -3,6 +3,7 @@ import {
   status,
   timeforstation,
   available_stations_request,
+  available_destinos,
 } from "./metrolisboa.mjs";
 //@ts-ignorec
 import cors from "cors";
@@ -44,7 +45,9 @@ export async function createServer(): Promise<Application> {
 
   app.get("/metrolisboa", async (req, res) => {
     const metrostatus = await status();
-    res.render("metrolisboa", { metrostatus, available_station });
+    let destinos = await available_destinos();
+    print(destinos);
+    res.render("metrolisboa", { metrostatus, available_station, destinos });
   });
 
   app.post(

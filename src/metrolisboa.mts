@@ -150,3 +150,21 @@ export async function available_stations_request(): Promise<
     throw new Error(`Key not working`);
   }
 }
+
+export async function available_destinos(): Promise<
+  Record<string, string> | string
+> {
+  //@ts-ignore
+  const key: Promise<string | undefined> = await generatekey();
+  //console.log(key);
+  if (typeof key == "string") {
+    const response = await requestFromMetro(url, "infoDestinos/todos", key);
+    if (response && response.codigo == 200) {
+      return response.resposta;
+    } else {
+      throw new Error(`json not in valid format`);
+    }
+  } else {
+    throw new Error(`Key not working`);
+  }
+}
