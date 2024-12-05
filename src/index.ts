@@ -1,4 +1,4 @@
-//import { status } from "./metrolisboa.mjs";
+import { timeforstation } from "./metrolisboa.mjs";
 import { createServer } from "./server.js";
 /*
 async function MetroStatus(): Promise<Record<string, string> | string> {
@@ -7,6 +7,14 @@ async function MetroStatus(): Promise<Record<string, string> | string> {
   return status_;
 }
 */
+/*async function timeforstationmetro(
+  station: string,
+): Promise<string | Record<string, string>> {
+  //@ts-ignore
+  let time_: string = await timeforstation(station);
+
+  return time_;
+}*/
 const PORT: number = 3000;
 
 // Create the server instance
@@ -23,3 +31,7 @@ async function startServer() {
 }
 
 startServer(); // Call the startServer function
+/*
+const result = await timeforstationmetro("CP");
+console.log(result[0]);
+*/

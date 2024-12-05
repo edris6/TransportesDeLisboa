@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="metro.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </script>
+  <script>
+    let available_metro_stations = '<%= available_station %>';
+    available_metro_stations = available_metro_stations.split(',');
+    let metro_destinos = <%- JSON.stringify(destinos) %>;
+  </script>
+</head>
+
+<body>
+  <div class="header">
+    <a href="" class="logo">TransportesDeLisboa</a>
+    <div class="header-right">
+      <a class="active" href="">Home</a>
+      <a href="">Contact</a>
+      <a href="">About</a>
+    </div>
+  </div>
+  <!--   figure out how to put ejs in local javascript-->
+  <div class="header_status">
+    <a class="logo">Linha amarela:<%= metrostatus.amarela %></a>
+    <a class="logo">Linha azul:<%= metrostatus.azul %></a>
+    <a class="logo">Linha verde:<%= metrostatus.verde %></a>
+    <a class="logo">Linha vermelha:<%= metrostatus.vermelha %></a>
+  </div>
+  <div class="metro-form">
+    <div class="form-group">
+      <label for="metrostation1">Metrostation:</label>
+      <br>
+      <div class="input-button">
+        <input type="text" id="metrostation1" name="metrostation">
+      </div>
+    </div>
+    <button id="send">Send</button>
+  </div>
+  <!-- <div class="container" id="container1">
+    <div class="item">
+      <a id="Destino_0">Destino</a><br>
+      <a id="Comboio1_0">Comboio1:</a><br>
+      <a id="tempoChegada1_0">tempoChegada1</a><br>
+      <a id="Comboio2_0">Comboio2:</a><br>
+      <a id="tempoChegada2_0">tempoChegada2</a><br>
+      <a id="Comboio3_0">Comboio3:</a><br>
+      <a id="tempoChegada3_0">tempoChegada3</a><br>
+    </div>
+    <div class="item">
+      <a id="Destino_1">Destino</a><br>
+      <a id="Comboio1_1">Comboio1:</a><br>
+      <a id="tempoChegada1_1">tempoChegada1</a><br>
+      <a id="Comboio2_1">Comboio2:</a><br>
+      <a id="tempoChegada2_1">tempoChegada2</a><br>
+      <a id="Comboio3_1">Comboio3:</a><br>
+      <a id="tempoChegada3_1">tempoChegada3</a><br>
+    </div>
+  </div>-->
+
+
+
+
+
+</body>
+<script async src="metrolisboa.js"></script>
+
+</html>
