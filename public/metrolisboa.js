@@ -59,9 +59,14 @@ function createAllTrainInfo(id_container, start_id, end_id) {
   mainContainer.id = "container" + id_container;
 
   // Create and append the items with specific IDs (e.g., 3, 4, etc.)
-  for (let i = start_id; i <= end_id; i++) {
-    const item = createTrainInfo(i);
+  if (start_id == end_id && end_id == start_id) {
+    const item = createTrainInfo(start_id);
     mainContainer.appendChild(item);
+  } else {
+    for (let i = start_id; i <= end_id; i++) {
+      const item = createTrainInfo(i);
+      mainContainer.appendChild(item);
+    }
   }
 
   // Append the main container to the body or a specific element
@@ -126,15 +131,13 @@ function displaydata(data) {
     tempoChegada3: tempoChegada3_0,
     destino: destino_0,
   } = data[0];
-  const {
-    comboio: comboio1_1,
-    tempoChegada1: tempoChegada1_1,
-    comboio2: comboio2_1,
-    tempoChegada2: tempoChegada2_1,
-    comboio3: comboio3_1,
-    tempoChegada3: tempoChegada3_1,
-    destino: destino_1,
-  } = data[1];
+  let comboio1_1,
+    tempoChegada1_1,
+    comboio2_1,
+    tempoChegada2_1,
+    comboio3_1,
+    tempoChegada3_1,
+    destino_1;
   let comboio1_2,
     tempoChegada1_2,
     comboio2_2,
@@ -150,8 +153,18 @@ function displaydata(data) {
     tempoChegada3_3,
     destino_3;
 
-  if (data.length == 4) {
-    // Destructuring the objects from data[2] and data[3]
+  if (data.length == 2) {
+    ({
+      comboio: comboio1_1,
+      tempoChegada1: tempoChegada1_1,
+      comboio2: comboio2_1,
+      tempoChegada2: tempoChegada2_1,
+      comboio3: comboio3_1,
+      tempoChegada3: tempoChegada3_1,
+      destino: destino_1,
+    } = data[1]);
+  }
+  if (data.length == 3) {
     ({
       comboio: comboio1_2,
       tempoChegada1: tempoChegada1_2,
@@ -161,6 +174,9 @@ function displaydata(data) {
       tempoChegada3: tempoChegada3_2,
       destino: destino_2,
     } = data[2]);
+  }
+  if (data.length == 4) {
+    // Destructuring the objects from data[2] and data[3]
 
     ({
       comboio: comboio1_3,
@@ -173,12 +189,18 @@ function displaydata(data) {
     } = data[3]);
   }
   //document.getElementById("answer").innerText =convertSecondsToMinutesAndSeconds(Number(tempoChegada2_0));
-  console.log(tempoChegada1_3);
+  //console.log(tempoChegada1_3);
   if (data.length == 4) {
     createAllTrainInfo(1, 0, 1);
     createAllTrainInfo(2, data.length - 2, data.length - 1);
+  } else if (data.length == 3) {
+    //cais do sodre
+    createAllTrainInfo(1, 0, 1);
+    createAllTrainInfo(2, 2, 2);
   } else if (data.length == 2) {
     createAllTrainInfo(1, data.length - 2, data.length - 1);
+  } else if (data.length == 1) {
+    createAllTrainInfo(1, 0, 0);
   }
   document.getElementById("Comboio1_0").innerText = "Comboio:" + comboio1_0;
   document.getElementById("tempoChegada1_0").innerText =
@@ -192,18 +214,20 @@ function displaydata(data) {
   document.getElementById("Destino_0").innerText =
     findNomeDestinoById(destino_0);
 
-  document.getElementById("Comboio1_1").innerText = "Comboio:" + comboio1_1;
-  document.getElementById("tempoChegada1_1").innerText =
-    convertSecondsToMinutesAndSeconds(tempoChegada1_1);
-  document.getElementById("Comboio2_1").innerText = "Comboio:" + comboio2_1;
-  document.getElementById("tempoChegada2_1").innerText =
-    convertSecondsToMinutesAndSeconds(tempoChegada2_1);
-  document.getElementById("Comboio3_1").innerText = "Comboio:" + comboio3_1;
-  document.getElementById("tempoChegada3_1").innerText =
-    convertSecondsToMinutesAndSeconds(tempoChegada3_1);
-  document.getElementById("Destino_1").innerText =
-    findNomeDestinoById(destino_1);
-  if (data.length == 4) {
+  if (data.length == 2) {
+    document.getElementById("Comboio1_1").innerText = "Comboio:" + comboio1_1;
+    document.getElementById("tempoChegada1_1").innerText =
+      convertSecondsToMinutesAndSeconds(tempoChegada1_1);
+    document.getElementById("Comboio2_1").innerText = "Comboio:" + comboio2_1;
+    document.getElementById("tempoChegada2_1").innerText =
+      convertSecondsToMinutesAndSeconds(tempoChegada2_1);
+    document.getElementById("Comboio3_1").innerText = "Comboio:" + comboio3_1;
+    document.getElementById("tempoChegada3_1").innerText =
+      convertSecondsToMinutesAndSeconds(tempoChegada3_1);
+    document.getElementById("Destino_1").innerText =
+      findNomeDestinoById(destino_1);
+  }
+  if (data.length == 3) {
     document.getElementById("Comboio1_2").innerText = "Comboio:" + comboio1_2;
     document.getElementById("tempoChegada1_2").innerText =
       convertSecondsToMinutesAndSeconds(tempoChegada1_2);
@@ -215,7 +239,8 @@ function displaydata(data) {
       convertSecondsToMinutesAndSeconds(tempoChegada3_2);
     document.getElementById("Destino_2").innerText =
       findNomeDestinoById(destino_2);
-
+  }
+  if (data.length == 4) {
     document.getElementById("Comboio1_3").innerText = "Comboio:" + comboio1_3;
     document.getElementById("tempoChegada1_3").innerText =
       convertSecondsToMinutesAndSeconds(tempoChegada1_3);
