@@ -9,6 +9,7 @@ import {
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import { stopover } from "./comboios.mjs";
 const print = console.log;
 const available_station: Array<string> = await available_stations();
 interface StationData {
@@ -48,6 +49,9 @@ export async function createServer(): Promise<Application> {
     let destinos = await available_destinos();
     print(destinos);
     res.render("metrolisboa", { metrostatus, available_station, destinos });
+  });
+  app.get("/comboios", async (req, res) => {
+    res.render("comboios");
   });
 
   app.post(

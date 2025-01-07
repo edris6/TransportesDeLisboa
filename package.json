@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "build": "tsc && npm run copy-js",
-    "copy-js": "copyfiles -u 1 src/**/*.mjs dist",
-    "watch": "npx chokidar \"src/**/*\" -c \"npm run build && npm run copy-js\"",
+    "watch": "tsc -w",
     "start": "node ./dist/index.js",
     "comboios": "node ./dist/comboios.mjs"
   },
@@ -26,8 +24,6 @@
     "@types/node": "^22.10.1",
     "@types/node-fetch": "^2.6.12",
     "@typescript-eslint/parser": "^5.62.0",
-    "chokidar-cli": "^3.0.0",
-    "copyfiles": "^2.4.1",
     "eslint": "^8.57.1",
     "prettier": "^3.4.1",
     "prettier-eslint": "^16.3.0",
