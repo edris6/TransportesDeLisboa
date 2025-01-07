@@ -10,7 +10,7 @@ function saveObjectToTxt(obj, filename) {
 async function station_exists(name) {
   let available_stations = await comboios.stations();
   for (let i = 0; i < available_stations.length; i++) {
-    if (available_stations[i].name == name) {
+    if (available_stations[i].name.toLowerCase() == name.toLowerCase()) {
       return [true, available_stations[i].id];
     }
   }
@@ -37,7 +37,7 @@ export async function stopover(name) {
   }
 }
 
-stopover("Entrecampos");
+//stopover("Entrecampos");
 
 //comboios.trip("18526@2025-01-06").then(console.log).catch(console.error);
 //NO DELAY INFORMATION

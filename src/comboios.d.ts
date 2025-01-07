@@ -1,4 +1,4 @@
 declare module "./comboios.mjs" {
-  const value: any;
+  const value: object | null;
   export = value;
 }

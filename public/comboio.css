@@ -1,0 +1,18 @@
+.horizontal-bar {
+  width: 100%; /* Full width of the container or specify a fixed width */
+  height: 50px; /* Height of the horizontal bar */
+  /*background-color: #3498db; /* Background color of the bar */
+  color: rgb(0, 0, 0); /* Text color */
+  display: flex; /* Flexbox to center text horizontally */
+  justify-content: center; /* Center text horizontally */
+  align-items: center; /* Center text vertically */
+  /*text-align: center; /* Ensure text is centered */
+  font-size: 16px; /* Text size */
+  /*padding: 0 20px; /* Padding left and right for spacing */
+  border-radius: 5px; /* Optional: rounded corners */
+  border: 2px solid #080808;
+}
+
+.horizontal-bar p {
+  margin: 0 10px; /* Add space between <p> elements */
+}
