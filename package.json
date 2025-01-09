@@ -4,14 +4,16 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "node ./dist/index.js"
+    "watch": "tsc -w",
+    "start": "node ./dist/index.js",
+    "comboios": "node ./dist/comboios.mjs"
   },
   "keywords": [],
   "author": "",
   "type": "module",
   "license": "ISC",
   "dependencies": {
+    "comboios": "^1.0.1",
     "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
@@ -25,6 +27,6 @@
     "eslint": "^8.57.1",
     "prettier": "^3.4.1",
     "prettier-eslint": "^16.3.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.7.2"
   }
 }

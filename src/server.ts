@@ -9,6 +9,7 @@ import {
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import { stopover, trip } from "./comboios.mjs";
 const print = console.log;
 const available_station: Array<string> = await available_stations();
 interface StationData {
@@ -49,6 +50,72 @@ export async function createServer(): Promise<Application> {
     print(destinos);
     res.render("metrolisboa", { metrostatus, available_station, destinos });
   });
+  app.get("/comboios", async (req, res) => {
+    res.render("comboios");
+  });
+
+  app.post(
+    "/api/comboio/stopover",
+    async (req: Request, res: Response): Promise<void> => {
+      const data = req.body;
+      print(req.body);
+      if (!data) {
+        //@ts-ignore
+        return res.status(400).json({ error: "I need station" });
+      }
+      if (!validateStationData(data)) {
+        //@ts-ignore
+        return res
+          .status(400)
+          .json({ error: "Wrong data structure or station is not a string" });
+      }
+
+      try {
+        const stopover_station = await stopover(data.station);
+        if (stopover_station != null) {
+          res.json(stopover_station);
+        } else {
+          //@ts-ignore
+          return res.status(400).json({ error: "Station doesnt exist" });
+        }
+      } catch (error) {
+        res.status(500).json({
+          error: "Something went wrong while processing async data",
+        });
+      }
+    },
+  );
+  app.post(
+    "/api/comboio/trip",
+    async (req: Request, res: Response): Promise<void> => {
+      const data = req.body;
+      print(req.body);
+      if (!data) {
+        //@ts-ignore
+        return res.status(400).json({ error: "I need train route id " });
+      }
+      if (!validateStationData(data)) {
+        //@ts-ignore
+        return res
+          .status(400)
+          .json({ error: "Wrong data structure or route id is not a string" });
+      }
+
+      try {
+        const trip_ = await trip(data.station);
+        if (trip_ != null) {
+          res.json(trip_);
+        } else {
+          //@ts-ignore
+          return res.status(400).json({ error: "line id doesnt exist" });
+        }
+      } catch (error) {
+        res.status(500).json({
+          error: "Something went wrong while processing async data",
+        });
+      }
+    },
+  );
 
   app.post(
     "/api/metro/status",

@@ -6,6 +6,6 @@ Servidor que oferece paginas com tempo para o metros, autocarros, barcos, ...
 - [ ] Metro Ligeiro do Sul do Tejo
 - [ ] Carris
 - [ ] Carris metroplitana(autocarros)
-- [ ] CP urbano
+- [X] CP urbano
 - [ ] Translejo Soflusa
 - [ ] Fertagus
