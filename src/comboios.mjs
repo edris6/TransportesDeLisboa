@@ -36,6 +36,10 @@ export async function stopover(name) {
     return null;
   }
 }
+export async function trip(id) {
+  const trip = await comboios.trip(id);
+  return trip;
+}
 
 //stopover("Entrecampos");
 
