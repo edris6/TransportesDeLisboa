@@ -153,7 +153,7 @@ function displaydata(data) {
     tempoChegada3_3,
     destino_3;
 
-  if (data.length == 2) {
+  if (data.length >= 2) {
     ({
       comboio: comboio1_1,
       tempoChegada1: tempoChegada1_1,
@@ -164,7 +164,7 @@ function displaydata(data) {
       destino: destino_1,
     } = data[1]);
   }
-  if (data.length == 3) {
+  if (data.length >= 3) {
     ({
       comboio: comboio1_2,
       tempoChegada1: tempoChegada1_2,
@@ -175,7 +175,7 @@ function displaydata(data) {
       destino: destino_2,
     } = data[2]);
   }
-  if (data.length == 4) {
+  if (data.length >= 4) {
     // Destructuring the objects from data[2] and data[3]
 
     ({
@@ -214,7 +214,7 @@ function displaydata(data) {
   document.getElementById("Destino_0").innerText =
     findNomeDestinoById(destino_0);
 
-  if (data.length == 2) {
+  if (data.length >= 2) {
     document.getElementById("Comboio1_1").innerText = "Comboio:" + comboio1_1;
     document.getElementById("tempoChegada1_1").innerText =
       convertSecondsToMinutesAndSeconds(tempoChegada1_1);
@@ -227,7 +227,7 @@ function displaydata(data) {
     document.getElementById("Destino_1").innerText =
       findNomeDestinoById(destino_1);
   }
-  if (data.length == 3) {
+  if (data.length >= 3) {
     document.getElementById("Comboio1_2").innerText = "Comboio:" + comboio1_2;
     document.getElementById("tempoChegada1_2").innerText =
       convertSecondsToMinutesAndSeconds(tempoChegada1_2);
@@ -240,7 +240,7 @@ function displaydata(data) {
     document.getElementById("Destino_2").innerText =
       findNomeDestinoById(destino_2);
   }
-  if (data.length == 4) {
+  if (data.length >= 4) {
     document.getElementById("Comboio1_3").innerText = "Comboio:" + comboio1_3;
     document.getElementById("tempoChegada1_3").innerText =
       convertSecondsToMinutesAndSeconds(tempoChegada1_3);

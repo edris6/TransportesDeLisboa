@@ -22,7 +22,7 @@ interface MetroResponseStatus {
 }*/
 
 async function generatekey(): Promise<string | undefined> {
-  const credentials = `${countryTable.consumer_key}:${countryTable.consumer_secret}`;
+  const credentials = `${countryTable.metro.consumer_key}:${countryTable.metro.consumer_secret}`;
   const encodedCredentials = Buffer.from(credentials).toString("base64");
   const url = "https://api.metrolisboa.pt:8243/token";
 
