@@ -1,12 +1,4 @@
 import comboios from "comboios";
-import fs from "fs";
-/*
-function saveObjectToTxt(obj, filename) {
-  const objectStr = JSON.stringify(obj, null, 2); // Convert object to a string
-
-  fs.writeFileSync(filename, objectStr, "utf8"); // Write the string to a file
-}
-*/
 async function station_exists(name) {
   let available_stations = await comboios.stations();
   for (let i = 0; i < available_stations.length; i++) {
@@ -31,7 +23,6 @@ export async function stopover(name) {
       }
     }
     return remainingTrains;
-    //saveObjectToTxt(remainingTrains, "test.txt");
   } else {
     return null;
   }
@@ -41,7 +32,3 @@ export async function trip(id) {
   return trip;
 }
 
-//stopover("Entrecampos");
-
-//comboios.trip("18526@2025-01-06").then(console.log).catch(console.error);
-//NO DELAY INFORMATION

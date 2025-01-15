@@ -5,7 +5,7 @@ import {
   available_stations_request,
   available_destinos,
 } from "./metrolisboa.mjs";
-//@ts-ignorec
+//@ts-ignore
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -26,7 +26,6 @@ async function available_stations(): Promise<Array<string>> {
   return final;
 }
 function validateStationData(data: StationData): boolean {
-  // Check if 'data' has the correct structure
   return typeof data.station === "string";
 }
 export async function createServer(): Promise<Application> {
@@ -39,7 +38,6 @@ export async function createServer(): Promise<Application> {
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "..", "views"));
   app.use(express.static(path.join(__dirname, "..", "public")));
-  // Example GET endpoint
   app.get("/api/greet", async (req: Request, res: Response): Promise<void> => {
     res.json({ message: "Hello, welcome to our API!" });
   });
@@ -173,10 +171,3 @@ export async function createServer(): Promise<Application> {
 
   return app;
 }
-/*
-async function getAsyncGreeting(): Promise<string> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve("Hello from the async API!"), 1000); // Simulate delay
-  });
-}
-*/

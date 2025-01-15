@@ -14,12 +14,6 @@ interface MetroResponseStatus {
     vermelha: string;
   };
 }
-/*interface MetroResponseKey {
-  acess_token: string;
-  scope: string;
-  token_type: string;
-  expires_in: number
-}*/
 
 async function generatekey(): Promise<string | undefined> {
   const credentials = `${countryTable.metro.consumer_key}:${countryTable.metro.consumer_secret}`;
@@ -51,14 +45,14 @@ async function generatekey(): Promise<string | undefined> {
 
     if (response.ok) {
       //@ts-ignore
-      return s.access_token; // Properly returning the access token
+      return s.access_token; 
     } else {
       //@ts-ignore
       throw new Error(`Error getting token: ${s.error}`);
     }
   } catch (error) {
     console.error("Error:", error);
-    return undefined; // Return undefined in case of error
+    return undefined; 
   }
 }
 
@@ -98,7 +92,6 @@ async function requestFromMetro(
 export async function status(): Promise<Record<string, string> | string> {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(url, "estadoLinha/todos", key);
     if (response && response.codigo == 200) {
@@ -117,7 +110,6 @@ export async function timeforstation(
 ): Promise<Record<string, string> | string> {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(
       url,
@@ -138,7 +130,6 @@ export async function available_stations_request(): Promise<
 > {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(url, "infoEstacao/todos", key);
     if (response && response.codigo == 200) {
@@ -156,7 +147,6 @@ export async function available_destinos(): Promise<
 > {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(url, "infoDestinos/todos", key);
     if (response && response.codigo == 200) {
