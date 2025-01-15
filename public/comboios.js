@@ -4,20 +4,19 @@ document.getElementById("send").onclick = function (event) {
   previnnerhtml = "";
   const train_station = document.getElementById("station1").value;
 
-  fetch(window.location.origin + "/api/comboio/stopover", {
-    method: "POST", // Set the request method to POST
+  fetch(window.location.origin + "/api/comboios/stopover", {
+    method: "POST",
     headers: {
-      "Content-Type": "application/json", // Tell the server that you're sending JSON data
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      // Convert the data to a JSON string
       station: train_station,
     }),
   })
-    .then((response) => response.json()) // Parse the JSON response
+    .then((response) => response.json())
     .then((data) => {
       managetrips("");
-      console.log("Success:", data); // Handle the response data
+      console.log("Success:", data);
       if (data.error == "Station doesnt exist") {
         managetrips("Station doesnt exist");
       } else {
@@ -26,11 +25,14 @@ document.getElementById("send").onclick = function (event) {
     })
     .catch((error) => {
       managetrips("ERROR");
-      console.error("Error:", error); // Handle errors
+      console.error("Error:", error);
     });
 };
+/**
+ * fetches trips
+ */
 function tripsrequest(id) {
-  return fetch(window.location.origin + "/api/comboio/trip", {
+  return fetch(window.location.origin + "/api/comboios/trip", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,6 +50,12 @@ function tripsrequest(id) {
       throw error;
     });
 }
+/**
+ * displays data
+ * @param {*} data
+ * @param {boolean} istrip
+ * @returns
+ */
 function displaydata(data, istrip) {
   if (typeof istrip != "boolean") {
     console.error("ERRORERROR not boolean");
@@ -69,7 +77,6 @@ function displaydata(data, istrip) {
     }
 
     if (istrip == true) {
-      //direction = data[i].direction.name;
       provenance = data.stopovers[i].stop.name;
       arrival = data.stopovers[i].arrival;
       platform = data.stopovers[i].arrivalPlatform;
@@ -102,9 +109,14 @@ function displaydata(data, istrip) {
     document.getElementById("trips").appendChild(mainContainer);
   }
 }
+/**
+ *
+ * @param {string} innerHTML set inner html to this
+ * @param {number} previnnerhtml_ if true puts this as previous inner html AND reputs ids into containers
+ */
 function managetrips(innerHTML, previnnerhtml_ = 0) {
   if (previnnerhtml_ == 1) {
-    var parentElement = document.getElementById("trips");
+    let parentElement = document.getElementById("trips");
     parentElement.innerHTML = previnnerhtml;
     for (
       let i = 0;
@@ -116,7 +128,7 @@ function managetrips(innerHTML, previnnerhtml_ = 0) {
         .addEventListener("click", (event) => seestops(event));
     }
   } else {
-    var parentElement = document.getElementById("trips");
+    let parentElement = document.getElementById("trips");
     parentElement.innerHTML = innerHTML;
   }
 }
@@ -138,4 +150,3 @@ function seestops(event) {
       console.log("Request failed:", error);
     });
 }
-//document.getElementById("trips").style = "visibility: hidden"

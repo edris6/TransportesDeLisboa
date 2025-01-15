@@ -11,10 +11,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { stopover, trip } from "./comboios.mjs";
 const print = console.log;
-const available_station: Array<string> = await available_stations();
+const available_station_metro: Array<string> = await available_stations();
 interface StationData {
   station: string;
 }
+/**
+ * returns list of available metro stations
+ * @returns available stations metro
+ */
 async function available_stations(): Promise<Array<string>> {
   let final: Array<string> = [];
   const data = await available_stations_request();
@@ -25,6 +29,9 @@ async function available_stations(): Promise<Array<string>> {
   }
   return final;
 }
+/**
+ * validates if value is string
+ */
 function validateStationData(data: StationData): boolean {
   return typeof data.station === "string";
 }
@@ -46,14 +53,18 @@ export async function createServer(): Promise<Application> {
     const metrostatus = await status();
     let destinos = await available_destinos();
     print(destinos);
-    res.render("metrolisboa", { metrostatus, available_station, destinos });
+    res.render("metrolisboa", {
+      metrostatus,
+      available_station_metro,
+      destinos,
+    });
   });
   app.get("/comboios", async (req, res) => {
     res.render("comboios");
   });
 
   app.post(
-    "/api/comboio/stopover",
+    "/api/comboios/stopover",
     async (req: Request, res: Response): Promise<void> => {
       const data = req.body;
       print(req.body);
@@ -84,7 +95,7 @@ export async function createServer(): Promise<Application> {
     },
   );
   app.post(
-    "/api/comboio/trip",
+    "/api/comboios/trip",
     async (req: Request, res: Response): Promise<void> => {
       const data = req.body;
       print(req.body);
@@ -153,7 +164,7 @@ export async function createServer(): Promise<Application> {
           .status(400)
           .json({ error: "Wrong data structure or station is not a string" });
       }
-      if (available_station.includes(data.station) == false) {
+      if (available_station_metro.includes(data.station) == false) {
         //@ts-ignore
         return res.status(400).json({ error: "Station doesnt exist" });
       }

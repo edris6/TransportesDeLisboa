@@ -1,16 +1,18 @@
+/**
+ * creates container for a given platform
+ * @param {number} id
+ * @returns htmldiveelemnt
+ */
 function createTrainInfo(id) {
-  // Create the container div
   const container = document.createElement("div");
   container.classList.add("item");
 
-  // Create the Destino link
   const destino = document.createElement("a");
   destino.id = `Destino_${id}`;
   destino.textContent = "Destino";
   container.appendChild(destino);
   container.appendChild(document.createElement("br"));
 
-  // Create the Comboio1 and tempoChegada1 links
   const comboio1 = document.createElement("a");
   comboio1.id = `Comboio1_${id}`;
   comboio1.textContent = `Comboio1:`;
@@ -23,7 +25,6 @@ function createTrainInfo(id) {
   container.appendChild(tempoChegada1);
   container.appendChild(document.createElement("br"));
 
-  // Create the Comboio2 and tempoChegada2 links
   const comboio2 = document.createElement("a");
   comboio2.id = `Comboio2_${id}`;
   comboio2.textContent = `Comboio2:`;
@@ -36,7 +37,6 @@ function createTrainInfo(id) {
   container.appendChild(tempoChegada2);
   container.appendChild(document.createElement("br"));
 
-  // Create the Comboio3 and tempoChegada3 links
   const comboio3 = document.createElement("a");
   comboio3.id = `Comboio3_${id}`;
   comboio3.textContent = `Comboio3:`;
@@ -51,14 +51,17 @@ function createTrainInfo(id) {
 
   return container;
 }
-
+/**
+ * calls create train info based on how many times it has to
+ * @param {number} id_container
+ * @param {number} start_id
+ * @param {number} end_id
+ */
 function createAllTrainInfo(id_container, start_id, end_id) {
-  // Create a parent container for all items
   const mainContainer = document.createElement("div");
   mainContainer.classList.add("container");
   mainContainer.id = "container" + id_container;
 
-  // Create and append the items with specific IDs (e.g., 3, 4, etc.)
   if (start_id == end_id && end_id == start_id) {
     const item = createTrainInfo(start_id);
     mainContainer.appendChild(item);
@@ -69,16 +72,25 @@ function createAllTrainInfo(id_container, start_id, end_id) {
     }
   }
 
-  // Append the main container to the body or a specific element
   document.body.appendChild(mainContainer);
 }
+/**
+ *convertSecondsToMinutesAndSeconds
+ * @param {*} seconds_not_converted
+ * @returns string of minutes:seconds
+ */
 function convertSecondsToMinutesAndSeconds(seconds_not_converted) {
   const seconds = Number(seconds_not_converted);
-  const minutes = Math.floor(seconds / 60); // Get the number of full minutes
-  const remainingSeconds = seconds % 60; // Get the remaining seconds
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
 
-  return `${minutes}m ${remainingSeconds}s`; // Return the result as a string in the format "Xm Ys"
+  return `${minutes}m ${remainingSeconds}s`;
 }
+/**
+ * finds name by id
+ * @param {number} id
+ * @returns
+ */
 function findNomeDestinoById(id) {
   for (let i = 0; i < metro_destinos.length; i++) {
     if (metro_destinos[i].id_destino == id) {
@@ -96,25 +108,27 @@ document.getElementById("send").onclick = function (event) {
     return;
   }
   fetch(window.location.origin + "/api/metro/timeforstation", {
-    method: "POST", // Set the request method to POST
+    method: "POST",
     headers: {
-      "Content-Type": "application/json", // Tell the server that you're sending JSON data
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      // Convert the data to a JSON string
       station: metrostation,
     }),
   })
-    .then((response) => response.json()) // Parse the JSON response
+    .then((response) => response.json())
     .then((data) => {
-      console.log("Success:", data); // Handle the response data
+      console.log("Success:", data);
       displaydata(data);
     })
     .catch((error) => {
-      console.error("Error:", error); // Handle errors
+      console.error("Error:", error);
     });
 };
-
+/**
+ * displays data in html
+ * @param {*} data
+ */
 function displaydata(data) {
   if (document.getElementById("container1") != null) {
     document.getElementById("container1").remove();
@@ -176,8 +190,6 @@ function displaydata(data) {
     } = data[2]);
   }
   if (data.length >= 4) {
-    // Destructuring the objects from data[2] and data[3]
-
     ({
       comboio: comboio1_3,
       tempoChegada1: tempoChegada1_3,
@@ -188,8 +200,7 @@ function displaydata(data) {
       destino: destino_3,
     } = data[3]);
   }
-  //document.getElementById("answer").innerText =convertSecondsToMinutesAndSeconds(Number(tempoChegada2_0));
-  //console.log(tempoChegada1_3);
+
   if (data.length == 4) {
     createAllTrainInfo(1, 0, 1);
     createAllTrainInfo(2, data.length - 2, data.length - 1);
