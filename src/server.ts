@@ -5,16 +5,20 @@ import {
   available_stations_request,
   available_destinos,
 } from "./metrolisboa.mjs";
-//@ts-ignorec
+//@ts-ignore
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { stopover, trip } from "./comboios.mjs";
 const print = console.log;
-const available_station: Array<string> = await available_stations();
+const available_station_metro: Array<string> = await available_stations();
 interface StationData {
   station: string;
 }
+/**
+ * returns list of available metro stations
+ * @returns available stations metro
+ */
 async function available_stations(): Promise<Array<string>> {
   let final: Array<string> = [];
   const data = await available_stations_request();
@@ -25,8 +29,10 @@ async function available_stations(): Promise<Array<string>> {
   }
   return final;
 }
+/**
+ * validates if value is string
+ */
 function validateStationData(data: StationData): boolean {
-  // Check if 'data' has the correct structure
   return typeof data.station === "string";
 }
 export async function createServer(): Promise<Application> {
@@ -39,7 +45,6 @@ export async function createServer(): Promise<Application> {
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "..", "views"));
   app.use(express.static(path.join(__dirname, "..", "public")));
-  // Example GET endpoint
   app.get("/api/greet", async (req: Request, res: Response): Promise<void> => {
     res.json({ message: "Hello, welcome to our API!" });
   });
@@ -48,14 +53,18 @@ export async function createServer(): Promise<Application> {
     const metrostatus = await status();
     let destinos = await available_destinos();
     print(destinos);
-    res.render("metrolisboa", { metrostatus, available_station, destinos });
+    res.render("metrolisboa", {
+      metrostatus,
+      available_station_metro,
+      destinos,
+    });
   });
   app.get("/comboios", async (req, res) => {
     res.render("comboios");
   });
 
   app.post(
-    "/api/comboio/stopover",
+    "/api/comboios/stopover",
     async (req: Request, res: Response): Promise<void> => {
       const data = req.body;
       print(req.body);
@@ -86,7 +95,7 @@ export async function createServer(): Promise<Application> {
     },
   );
   app.post(
-    "/api/comboio/trip",
+    "/api/comboios/trip",
     async (req: Request, res: Response): Promise<void> => {
       const data = req.body;
       print(req.body);
@@ -155,7 +164,7 @@ export async function createServer(): Promise<Application> {
           .status(400)
           .json({ error: "Wrong data structure or station is not a string" });
       }
-      if (available_station.includes(data.station) == false) {
+      if (available_station_metro.includes(data.station) == false) {
         //@ts-ignore
         return res.status(400).json({ error: "Station doesnt exist" });
       }
@@ -173,10 +182,3 @@ export async function createServer(): Promise<Application> {
 
   return app;
 }
-/*
-async function getAsyncGreeting(): Promise<string> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve("Hello from the async API!"), 1000); // Simulate delay
-  });
-}
-*/

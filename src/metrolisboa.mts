@@ -14,13 +14,10 @@ interface MetroResponseStatus {
     vermelha: string;
   };
 }
-/*interface MetroResponseKey {
-  acess_token: string;
-  scope: string;
-  token_type: string;
-  expires_in: number
-}*/
-
+/**
+ * Generates metro key based on master key
+ * @returns key or undefined
+ */
 async function generatekey(): Promise<string | undefined> {
   const credentials = `${countryTable.metro.consumer_key}:${countryTable.metro.consumer_secret}`;
   const encodedCredentials = Buffer.from(credentials).toString("base64");
@@ -51,17 +48,20 @@ async function generatekey(): Promise<string | undefined> {
 
     if (response.ok) {
       //@ts-ignore
-      return s.access_token; // Properly returning the access token
+      return s.access_token;
     } else {
       //@ts-ignore
       throw new Error(`Error getting token: ${s.error}`);
     }
   } catch (error) {
     console.error("Error:", error);
-    return undefined; // Return undefined in case of error
+    return undefined;
   }
 }
-
+/**
+ *Does a get request to metro api
+ @returns metroresponse or undefined
+ */
 async function requestFromMetro(
   urls: string = url,
   location: string,
@@ -94,11 +94,13 @@ async function requestFromMetro(
     return undefined;
   }
 }
-
+/**
+ * return metrostatus at current time
+ * @returns list of variables
+ */
 export async function status(): Promise<Record<string, string> | string> {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(url, "estadoLinha/todos", key);
     if (response && response.codigo == 200) {
@@ -111,13 +113,16 @@ export async function status(): Promise<Record<string, string> | string> {
     throw new Error(`Key not working`);
   }
 }
-
+/**
+ * returns time for given station
+ * @param estacao
+ * @returns time or error()
+ */
 export async function timeforstation(
   estacao: string,
 ): Promise<Record<string, string> | string> {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(
       url,
@@ -133,12 +138,15 @@ export async function timeforstation(
     throw new Error(`Key not working`);
   }
 }
+/**
+ * Returns list of available stations
+ * @returns response or new Error()
+ */
 export async function available_stations_request(): Promise<
   Record<string, string> | string
 > {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(url, "infoEstacao/todos", key);
     if (response && response.codigo == 200) {
@@ -150,13 +158,15 @@ export async function available_stations_request(): Promise<
     throw new Error(`Key not working`);
   }
 }
-
+/**
+ * All possible destinations, and their number correspondance
+ * @returns string or new Error()
+ */
 export async function available_destinos(): Promise<
   Record<string, string> | string
 > {
   //@ts-ignore
   const key: Promise<string | undefined> = await generatekey();
-  //console.log(key);
   if (typeof key == "string") {
     const response = await requestFromMetro(url, "infoDestinos/todos", key);
     if (response && response.codigo == 200) {

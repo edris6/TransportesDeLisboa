@@ -1,12 +1,8 @@
 import comboios from "comboios";
-import fs from "fs";
-/*
-function saveObjectToTxt(obj, filename) {
-  const objectStr = JSON.stringify(obj, null, 2); // Convert object to a string
-
-  fs.writeFileSync(filename, objectStr, "utf8"); // Write the string to a file
-}
-*/
+/**
+ * Checks if station exists
+ * @returns [exists,if so returns ID]
+ */
 async function station_exists(name) {
   let available_stations = await comboios.stations();
   for (let i = 0; i < available_stations.length; i++) {
@@ -16,6 +12,11 @@ async function station_exists(name) {
   }
   return [false, null];
 }
+/**
+ * returns trains that will pass in a station, by name(null if doesnt exist)
+ * @param {string} name
+ * @returns remainingtrains or null
+ */
 export async function stopover(name) {
   const exists = await station_exists(name);
   if (exists[0]) {
@@ -31,17 +32,16 @@ export async function stopover(name) {
       }
     }
     return remainingTrains;
-    //saveObjectToTxt(remainingTrains, "test.txt");
   } else {
     return null;
   }
 }
+/**
+ * returns stops train will pass by
+ * @param {string} id
+ * @returns json or error
+ */
 export async function trip(id) {
   const trip = await comboios.trip(id);
   return trip;
 }
-
-//stopover("Entrecampos");
-
-//comboios.trip("18526@2025-01-06").then(console.log).catch(console.error);
-//NO DELAY INFORMATION
