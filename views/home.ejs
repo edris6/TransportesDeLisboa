@@ -3,27 +3,45 @@
 
 <head>
   <link rel="stylesheet" href="default.css">
+  <link rel="stylesheet" href="home.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
 
 <body>
   <div class="header">
-    <a href="" class="logo">TransportesDeLisboa</a>
+    <a href="/" class="logo">TransportesDeLisboa</a>
     <div class="header-right">
-      <a class="active" href="">Home</a>
+      <a href="">Home</a>
       <a href="">Contact</a>
       <a href="">About</a>
+    </div>
+
+
+  </div>
+
+  <div class="center-wrapper">
+    <div class="center-this">
+      <button onclick="location.href = 'metrolisboa'">metrolisboa</button><br>
+      <button onclick="location.href = 'comboios'">comboios</button><br>
     </div>
   </div>
 
 
-  </div>
+  <script>
+    // Function to update the custom property --header-height dynamically
+    function updateHeaderHeight() {
+      const header = document.querySelector('.header');
+      const headerHeight = header.offsetHeight;
+      document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+    }
 
+    // Wait for the DOM to load, then set the header height
+    window.addEventListener('load', updateHeaderHeight);
 
-
-
-
+    // Recalculate the height whenever the window is resized
+    window.addEventListener('resize', updateHeaderHeight);
+  </script>
 </body>
 
 </html>
