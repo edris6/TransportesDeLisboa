@@ -48,7 +48,9 @@ export async function createServer(): Promise<Application> {
   app.get("/api/greet", async (req: Request, res: Response): Promise<void> => {
     res.json({ message: "Hello, welcome to our API!" });
   });
-
+  app.get("/", async (req: Request, res: Response): Promise<void> => {
+    res.render("home");
+  });
   app.get("/metrolisboa", async (req, res) => {
     const metrostatus = await status();
     let destinos = await available_destinos();

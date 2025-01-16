@@ -1,19 +1,16 @@
-.metro-form {
-  display: flex; /* Make form groups appear side by side */
-  width: 100%;
+button {
+  padding: 5px 10px;
 }
-
 .form-group {
   display: flex;
   flex-direction: column;
-  margin-right: 20px; /* Optional: Add space between the form groups */
+  margin-right: 20px;
 }
 
 .input-button {
-  display: flex; /* Align input and button side by side */
+  display: flex;
   align-items: center;
 }
-
 input {
   margin-right: 10px; /* Space between the input and button */
 }
@@ -24,10 +21,6 @@ button {
 
 label {
   margin-bottom: 5px; /* Optional: Adds space between the label and input */
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
@@ -103,17 +96,4 @@ body {
   .header-right {
     float: none;
   }
-}
-
-.container {
-  display: flex; /* Enable Flexbox */
-  gap: 20px; /* Adjust space between items. Use px, rem, or other units */
-  justify-content: space-between; /* Optional: evenly space out the items across the container */
-  align-items: flex-start; /* Align items at the top of the container */
-}
-
-.item {
-  flex: 1; /* Makes the items flexible and adjust according to the available space */
-  padding: 10px; /* Optional: Adds padding inside each item */
-  border: 1px solid #ccc; /* Optional: adds border around each item */
 }
