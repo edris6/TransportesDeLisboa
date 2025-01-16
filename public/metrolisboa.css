@@ -3,17 +3,6 @@
   width: 100%;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-right: 20px; /* Optional: Add space between the form groups */
-}
-
-.input-button {
-  display: flex; /* Align input and button side by side */
-  align-items: center;
-}
-
 .container {
   display: flex; /* Enable Flexbox */
   gap: 20px; /* Adjust space between items. Use px, rem, or other units */
