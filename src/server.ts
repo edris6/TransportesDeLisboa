@@ -8,8 +8,13 @@ import {
 //@ts-ignore
 import cors from "cors";
 import path from "path";
+import { writeFile } from "fs";
 import { fileURLToPath } from "url";
 import { stopover, trip } from "./comboios.mjs";
+import fetch from "node-fetch";
+import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
+import {importCarrisGtfs}from './gtfscarris'
+import e from "express";
 const print = console.log;
 const available_station_metro: Array<string> = await available_stations();
 interface StationData {
@@ -181,6 +186,52 @@ export async function createServer(): Promise<Application> {
       }
     },
   );
+
+  // ----------- Carris live bus data API ------------
+
+  app.get("/api/carris/live", async (_req, res) => {
+    try {
+      const rtUrl = "https://gateway.carris.pt/gateway/gtfs/api/v2.11/GTFS/realtime/vehiclepositions";
+      const response = await fetch(rtUrl);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  
+      const buffer = await response.arrayBuffer();
+      //@ts-ignore
+      const message = GtfsRealtimeBindings.default.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));/*
+      writeFile("./print.txt", JSON.stringify(message.entity), 'utf8', function (err) {
+        if (err) {
+            return console.log(err);
+        }
+    
+        console.log("The file was saved!");
+    }); */
+      const vehicles = message.entity
+      //@ts-ignore  
+      .filter(e => e.vehicle)
+      //@ts-ignore
+        .map(v => ({
+          id: v.id,
+          lat: v.vehicle.position.latitude,
+          lon: v.vehicle.position.longitude,
+          routeId: v.vehicle.trip.routeId,
+        }));
+  
+      res.json(vehicles);
+    } catch (err) {
+      console.error("Carris live fetch error:", err);
+      res.status(500).json({ error: "Failed to fetch Carris live data" });
+    }
+  });
+
+  // Carris live map page route
+  app.get("/carris", (_req, res) => {
+    res.render("carris");
+  });
+
+  app.get("/api/carris/stops", (_req,res) => {
+    console.log("Test")
+
+  })
 
   return app;
 }
