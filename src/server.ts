@@ -12,8 +12,8 @@ import { writeFile } from "fs";
 import { fileURLToPath } from "url";
 import { stopover, trip } from "./comboios.mjs";
 import fetch from "node-fetch";
-import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
-import {getCarrisStops}from './gtfscarris.js'
+import * as GtfsRealtimeBindings from "gtfs-realtime-bindings";
+import { getCarrisStops } from "./gtfscarris.js";
 const print = console.log;
 const available_station_metro: Array<string> = await available_stations();
 interface StationData {
@@ -190,13 +190,19 @@ export async function createServer(): Promise<Application> {
 
   app.get("/api/carris/live", async (_req, res) => {
     try {
-      const rtUrl = "https://gateway.carris.pt/gateway/gtfs/api/v2.11/GTFS/realtime/vehiclepositions";
+      const rtUrl =
+        "https://gateway.carris.pt/gateway/gtfs/api/v2.11/GTFS/realtime/vehiclepositions";
       const response = await fetch(rtUrl);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
       const buffer = await response.arrayBuffer();
       //@ts-ignore
-      const message = GtfsRealtimeBindings.default.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));/*
+      const message =
+        //@ts-ignore
+        GtfsRealtimeBindings.default.transit_realtime.FeedMessage.decode(
+          new Uint8Array(buffer),
+        ); /*
       writeFile("./print.txt", JSON.stringify(message.entity), 'utf8', function (err) {
         if (err) {
             return console.log(err);
@@ -205,17 +211,17 @@ export async function createServer(): Promise<Application> {
         console.log("The file was saved!");
     }); */
       const vehicles = message.entity
-      //@ts-ignore  
-      .filter(e => e.vehicle)
-      //@ts-ignore
-        .map(v => ({
+        //@ts-ignore
+        .filter((e) => e.vehicle)
+        //@ts-ignore
+        .map((v) => ({
           id: v.id,
           lat: v.vehicle.position.latitude,
           lon: v.vehicle.position.longitude,
           routeId: v.vehicle.trip.routeId,
-          current_stop_sequence: v.current_stop_sequence ?? null
+          current_stop_sequence: v.current_stop_sequence ?? null,
         }));
-  
+
       res.json(vehicles);
     } catch (err) {
       console.error("Carris live fetch error:", err);
@@ -228,12 +234,13 @@ export async function createServer(): Promise<Application> {
     res.render("carris");
   });
 
-  app.get("/api/carris/stops", async (_req,res) => {
-    let stops = await getCarrisStops().catch(err => {
-      res.status(500).json({ error: "Failed to fetch Carris stops data from db" });
+  app.get("/api/carris/stops", async (_req, res) => {
+    let stops = await getCarrisStops().catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Failed to fetch Carris stops data from db" });
     });
-    res.json(stops)
-
+    res.json(stops);
   });
 
   return app;
