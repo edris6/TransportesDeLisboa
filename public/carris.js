@@ -1,8 +1,14 @@
-const map = L.map("map").setView([38.7169, -9.139], 13); // Lisbon coords
+const map = L.map("map").setView([38.7169, -9.139], 13);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "&copy; OpenStreetMap contributors",
-}).addTo(map);
+L.tileLayer(
+  "https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png",
+  {
+    attribution:
+      "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://www.carto.com/'>CARTO</a>",
+    subdomains: "abcd",
+    maxZoom: 19,
+  },
+).addTo(map);
 
 let bmarkers = [];
 function getBusIconSize() {
@@ -49,7 +55,7 @@ async function loadstops() {
     stops.forEach((stop) => {
       console.log(stop);
       let myicon = L.icon({
-        iconUrl: "circle.jpg",
+        iconUrl: "circle-removebg-preview.png",
         iconSize: [7, 7],
       });
       const marker = L.marker([stop.stop_lat, stop.stop_lon], {
