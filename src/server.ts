@@ -13,8 +13,7 @@ import { fileURLToPath } from "url";
 import { stopover, trip } from "./comboios.mjs";
 import fetch from "node-fetch";
 import * as GtfsRealtimeBindings from 'gtfs-realtime-bindings';
-import {importCarrisGtfs}from './gtfscarris'
-import e from "express";
+import {getCarrisStops}from './gtfscarris.js'
 const print = console.log;
 const available_station_metro: Array<string> = await available_stations();
 interface StationData {
@@ -214,6 +213,7 @@ export async function createServer(): Promise<Application> {
           lat: v.vehicle.position.latitude,
           lon: v.vehicle.position.longitude,
           routeId: v.vehicle.trip.routeId,
+          current_stop_sequence: v.current_stop_sequence ?? null
         }));
   
       res.json(vehicles);
@@ -228,10 +228,13 @@ export async function createServer(): Promise<Application> {
     res.render("carris");
   });
 
-  app.get("/api/carris/stops", (_req,res) => {
-    console.log("Test")
+  app.get("/api/carris/stops", async (_req,res) => {
+    let stops = await getCarrisStops().catch(err => {
+      res.status(500).json({ error: "Failed to fetch Carris stops data from db" });
+    });
+    res.json(stops)
 
-  })
+  });
 
   return app;
 }

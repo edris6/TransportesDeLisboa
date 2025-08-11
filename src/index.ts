@@ -1,4 +1,11 @@
 import { createServer } from "./server.js";
+import { createCarrisGtfs } from "./gtfscarris.js"
+const response = await createCarrisGtfs()
+if (response != true){
+  console.error(response)
+  process.exit()
+}
+
 const PORT: number = 3000;
 
 const app = createServer();
