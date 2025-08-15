@@ -1,12 +1,13 @@
 let previnnerhtml = "";
 
-document.getElementById("send").onclick = function (event) {
+function getstation(id) {
   previnnerhtml = "";
   //const train_station = document.getElementById("station1").value;
 
   fetch(
     window.location.origin +
-      "/proxy?url=https://www.cp.pt/sites/spring/station/trains?stationId=94-2006",
+      "/proxy?url=https://www.cp.pt/sites/spring/station/trains?stationId=" +
+      id,
     {
       method: "GET",
       headers: {
@@ -27,7 +28,7 @@ document.getElementById("send").onclick = function (event) {
       managetrips("ERROR");
       console.error("Error:", error);
     });
-};
+}
 /**
  * fetches trips
  */
