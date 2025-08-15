@@ -6,7 +6,33 @@
   <link rel="stylesheet" href="comboio.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="comboios.js" async></script>
+  <script src="comboiosautocomplete.js" async></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .autocomplete-container { position: relative; width: 300px; }
+    input { width: 100%; padding: 8px; font-size: 14px; }
+   /* .suggestions {
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      display: flex; flex-wrap: wrap; gap: 5px;
+      padding: 5px;
+      max-height: 150px; overflow-y: auto;
+      z-index: 1000;
+    }*/
+    .suggestions {
+  display: none; /* hidden by default */
+}
+.suggestion {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+.suggestions.show {
+  display: flex; /* shown when results exist */
+}
 
+  </style>
 </head>
 
 <body>
@@ -23,11 +49,12 @@
     <div class="form-group">
       <label for="station">ComboiosDePortugal Station:</label>
       <br>
-      <div class="input-button">
-        <input type="text" id="station1" name="station">
+      <div class="autocomplete-container">
+        <input type="text" id="search" placeholder="Start typing...">
+        <div class="suggestions" id="suggestions"></div>
       </div>
     </div>
-    <button id="send">Send</button>
+    <!--<button id="send">Send</button>-->
   </div>
   <div id="trips">
 
