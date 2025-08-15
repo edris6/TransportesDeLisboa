@@ -152,6 +152,62 @@ export async function createServer(): Promise<Application> {
       }
     },
   );
+  // ----------- Carris live bus data API ------------
+
+  app.get("/api/carris/live", async (_req, res) => {
+    try {
+      const rtUrl =
+        "https://gateway.carris.pt/gateway/gtfs/api/v2.11/GTFS/realtime/vehiclepositions";
+      const response = await fetch(rtUrl);
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
+      const buffer = await response.arrayBuffer();
+      //@ts-ignore
+      const message =
+        //@ts-ignore
+        GtfsRealtimeBindings.default.transit_realtime.FeedMessage.decode(
+          new Uint8Array(buffer),
+        ); /*
+      writeFile("./print.txt", JSON.stringify(message.entity), 'utf8', function (err) {
+        if (err) {
+            return console.log(err);
+        }
+    
+        console.log("The file was saved!");
+    }); */
+      const vehicles = message.entity
+        //@ts-ignore
+        .filter((e) => e.vehicle)
+        //@ts-ignore
+        .map((v) => ({
+          id: v.id,
+          lat: v.vehicle.position.latitude,
+          lon: v.vehicle.position.longitude,
+          routeId: v.vehicle.trip.routeId,
+          current_stop_sequence: v.current_stop_sequence ?? null,
+        }));
+
+      res.json(vehicles);
+    } catch (err) {
+      console.error("Carris live fetch error:", err);
+      res.status(500).json({ error: "Failed to fetch Carris live data" });
+    }
+  });
+
+  // Carris live map page route
+  app.get("/carris", (_req, res) => {
+    res.render("carris");
+  });
+
+  app.get("/api/carris/stops", async (_req, res) => {
+    let stops = await getCarrisStops().catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Failed to fetch Carris stops data from db" });
+    });
+    res.json(stops);
+  });
 
   return app;
 }
