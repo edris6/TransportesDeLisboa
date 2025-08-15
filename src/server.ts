@@ -9,11 +9,13 @@ import {
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import { stopover, trip } from "./comboios.mjs";
 const print = console.log;
 const available_station_metro: Array<string> = await available_stations();
 interface StationData {
   station: string;
+}
+interface ProxyQuery {
+  url?: string;
 }
 /**
  * returns list of available metro stations
@@ -64,70 +66,6 @@ export async function createServer(): Promise<Application> {
   app.get("/comboios", async (req, res) => {
     res.render("comboios");
   });
-
-  app.post(
-    "/api/comboios/stopover",
-    async (req: Request, res: Response): Promise<void> => {
-      const data = req.body;
-      print(req.body);
-      if (!data) {
-        //@ts-ignore
-        return res.status(400).json({ error: "I need station" });
-      }
-      if (!validateStationData(data)) {
-        //@ts-ignore
-        return res
-          .status(400)
-          .json({ error: "Wrong data structure or station is not a string" });
-      }
-
-      try {
-        const stopover_station = await stopover(data.station);
-        if (stopover_station != null) {
-          res.json(stopover_station);
-        } else {
-          //@ts-ignore
-          return res.status(400).json({ error: "Station doesnt exist" });
-        }
-      } catch (error) {
-        res.status(500).json({
-          error: "Something went wrong while processing async data",
-        });
-      }
-    },
-  );
-  app.post(
-    "/api/comboios/trip",
-    async (req: Request, res: Response): Promise<void> => {
-      const data = req.body;
-      print(req.body);
-      if (!data) {
-        //@ts-ignore
-        return res.status(400).json({ error: "I need train route id " });
-      }
-      if (!validateStationData(data)) {
-        //@ts-ignore
-        return res
-          .status(400)
-          .json({ error: "Wrong data structure or route id is not a string" });
-      }
-
-      try {
-        const trip_ = await trip(data.station);
-        if (trip_ != null) {
-          res.json(trip_);
-        } else {
-          //@ts-ignore
-          return res.status(400).json({ error: "line id doesnt exist" });
-        }
-      } catch (error) {
-        res.status(500).json({
-          error: "Something went wrong while processing async data",
-        });
-      }
-    },
-  );
-
   app.post(
     "/api/metro/status",
     async (req: Request, res: Response): Promise<void> => {
@@ -178,6 +116,36 @@ export async function createServer(): Promise<Application> {
         res.status(500).json({
           error: "Something went wrong while processing async data",
         });
+      }
+    },
+  );
+
+  app.get(
+    "/proxy",
+    async (
+      req: Request<{}, any, any, ProxyQuery>,
+      res: Response,
+    ): Promise<void> => {
+      const targetUrl = req.query.url;
+
+      if (!targetUrl) {
+        res.status(400).json({ error: "Missing url query parameter" });
+        return;
+      }
+
+      try {
+        const response = await fetch(targetUrl);
+        const contentType = response.headers.get("content-type");
+        const body = await response.text();
+
+        if (contentType) res.set("Content-Type", contentType);
+        res.send(body);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: String(error) });
+        }
       }
     },
   );

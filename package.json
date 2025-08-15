@@ -13,7 +13,6 @@
   "type": "module",
   "license": "ISC",
   "dependencies": {
-    "comboios": "^1.0.1",
     "cors": "^2.8.5",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
