@@ -10,7 +10,6 @@ import cors from "cors";
 import path from "path";
 import { writeFile } from "fs";
 import { fileURLToPath } from "url";
-import { stopover, trip } from "./comboios.mjs";
 import fetch from "node-fetch";
 import * as GtfsRealtimeBindings from "gtfs-realtime-bindings";
 import { getCarrisStops } from "./gtfscarris.js";
@@ -18,6 +17,9 @@ const print = console.log;
 const available_station_metro: Array<string> = await available_stations();
 interface StationData {
   station: string;
+}
+interface ProxyQuery {
+  url?: string;
 }
 /**
  * returns list of available metro stations
@@ -68,70 +70,6 @@ export async function createServer(): Promise<Application> {
   app.get("/comboios", async (req, res) => {
     res.render("comboios");
   });
-
-  app.post(
-    "/api/comboios/stopover",
-    async (req: Request, res: Response): Promise<void> => {
-      const data = req.body;
-      print(req.body);
-      if (!data) {
-        //@ts-ignore
-        return res.status(400).json({ error: "I need station" });
-      }
-      if (!validateStationData(data)) {
-        //@ts-ignore
-        return res
-          .status(400)
-          .json({ error: "Wrong data structure or station is not a string" });
-      }
-
-      try {
-        const stopover_station = await stopover(data.station);
-        if (stopover_station != null) {
-          res.json(stopover_station);
-        } else {
-          //@ts-ignore
-          return res.status(400).json({ error: "Station doesnt exist" });
-        }
-      } catch (error) {
-        res.status(500).json({
-          error: "Something went wrong while processing async data",
-        });
-      }
-    },
-  );
-  app.post(
-    "/api/comboios/trip",
-    async (req: Request, res: Response): Promise<void> => {
-      const data = req.body;
-      print(req.body);
-      if (!data) {
-        //@ts-ignore
-        return res.status(400).json({ error: "I need train route id " });
-      }
-      if (!validateStationData(data)) {
-        //@ts-ignore
-        return res
-          .status(400)
-          .json({ error: "Wrong data structure or route id is not a string" });
-      }
-
-      try {
-        const trip_ = await trip(data.station);
-        if (trip_ != null) {
-          res.json(trip_);
-        } else {
-          //@ts-ignore
-          return res.status(400).json({ error: "line id doesnt exist" });
-        }
-      } catch (error) {
-        res.status(500).json({
-          error: "Something went wrong while processing async data",
-        });
-      }
-    },
-  );
-
   app.post(
     "/api/metro/status",
     async (req: Request, res: Response): Promise<void> => {
@@ -185,63 +123,35 @@ export async function createServer(): Promise<Application> {
       }
     },
   );
+  app.get(
+    "/proxy",
+    async (
+      req: Request<{}, any, any, ProxyQuery>,
+      res: Response,
+    ): Promise<void> => {
+      const targetUrl = req.query.url;
 
-  // ----------- Carris live bus data API ------------
+      if (!targetUrl) {
+        res.status(400).json({ error: "Missing url query parameter" });
+        return;
+      }
 
-  app.get("/api/carris/live", async (_req, res) => {
-    try {
-      const rtUrl =
-        "https://gateway.carris.pt/gateway/gtfs/api/v2.11/GTFS/realtime/vehiclepositions";
-      const response = await fetch(rtUrl);
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
+      try {
+        const response = await fetch(targetUrl);
+        const contentType = response.headers.get("content-type");
+        const body = await response.text();
 
-      const buffer = await response.arrayBuffer();
-      //@ts-ignore
-      const message =
-        //@ts-ignore
-        GtfsRealtimeBindings.default.transit_realtime.FeedMessage.decode(
-          new Uint8Array(buffer),
-        ); /*
-      writeFile("./print.txt", JSON.stringify(message.entity), 'utf8', function (err) {
-        if (err) {
-            return console.log(err);
+        if (contentType) res.set("Content-Type", contentType);
+        res.send(body);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          res.status(500).json({ error: error.message });
+        } else {
+          res.status(500).json({ error: String(error) });
         }
-    
-        console.log("The file was saved!");
-    }); */
-      const vehicles = message.entity
-        //@ts-ignore
-        .filter((e) => e.vehicle)
-        //@ts-ignore
-        .map((v) => ({
-          id: v.id,
-          lat: v.vehicle.position.latitude,
-          lon: v.vehicle.position.longitude,
-          routeId: v.vehicle.trip.routeId,
-          current_stop_sequence: v.current_stop_sequence ?? null,
-        }));
-
-      res.json(vehicles);
-    } catch (err) {
-      console.error("Carris live fetch error:", err);
-      res.status(500).json({ error: "Failed to fetch Carris live data" });
-    }
-  });
-
-  // Carris live map page route
-  app.get("/carris", (_req, res) => {
-    res.render("carris");
-  });
-
-  app.get("/api/carris/stops", async (_req, res) => {
-    let stops = await getCarrisStops().catch((err) => {
-      res
-        .status(500)
-        .json({ error: "Failed to fetch Carris stops data from db" });
-    });
-    res.json(stops);
-  });
+      }
+    },
+  );
 
   return app;
 }
