@@ -69,7 +69,28 @@ async function loadstops() {
     console.error(e);
   }
 }
+let shapeMap = {};
 
+async function loadShapes() {
+  const res = await fetch("/api/carris/shapes");
+  const data = await res.json();
+
+  shapeMap = data.reduce((acc, p) => {
+    if (!acc[p.shape_id]) acc[p.shape_id] = [];
+    acc[p.shape_id].push([p.lat, p.lon]);
+    return acc;
+  }, {});
+}
+
+function drawShape(id) {
+  const coords = shapeMap[id];
+  if (!coords) {
+    alert("Shape not found");
+    return;
+  }
+  const polyline = L.polyline(coords, { color: "blue" }).addTo(map);
+  map.fitBounds(polyline.getBounds());
+}
 loadstops();
 map.on("zoomend", loadBuses);
 loadBuses();
