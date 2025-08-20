@@ -12,7 +12,11 @@ import { writeFile } from "fs";
 import { fileURLToPath } from "url";
 import fetch from "node-fetch";
 import * as GtfsRealtimeBindings from "gtfs-realtime-bindings";
-import { getCarrisShapes, getCarrisStops } from "./gtfscarris.js";
+import {
+  getCarrisRouteId,
+  getCarrisShapes,
+  getCarrisStops,
+} from "./gtfscarris.js";
 const print = console.log;
 const available_station_metro: Array<string> = await available_stations();
 interface StationData {
@@ -216,6 +220,13 @@ export async function createServer(): Promise<Application> {
     });
     res.json(shapes);
   });
-
+  app.get("/api/carris/getroutesid", async (_req, res) => {
+    let shapes = await getCarrisRouteId().catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Failed to fetch Carris stops data from db" });
+    });
+    res.json(shapes);
+  });
   return app;
 }

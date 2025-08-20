@@ -54,5 +54,24 @@ ORDER BY shape_id ASC, shape_pt_sequence ASC;
   await db.close();
   return shapes;
 }
+export async function getCarrisRouteId() {
+  const db = await openCarrisDb();
+  if (db == null) {
+    return null;
+  }
+  const ids = await db.all(`
+  SELECT DISTINCT
+    t.route_id,
+    t.shape_id,
+    r.route_short_name,
+    r.route_long_name
+  FROM trips t
+  JOIN routes r
+    ON t.route_id = r.route_id
+`);
+
+  await db.close();
+  return ids;
+}
 
 //console.log(await getCarrisStops().catch(console.error));

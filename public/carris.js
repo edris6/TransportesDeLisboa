@@ -70,6 +70,7 @@ async function loadstops() {
   }
 }
 let shapeMap = {};
+let routeIDS = null;
 
 async function loadShapes() {
   const res = await fetch("/api/carris/shapes");
@@ -81,7 +82,14 @@ async function loadShapes() {
     return acc;
   }, {});
 }
-
+async function getIDS() {
+  const res = await fetch("/api/carris/getroutesid");
+  const data = await res.json();
+  return (routeIDS = data);
+}
+async function getname(id, routeids = routeIDS) {
+  filtered = rows.filter((r) => r.route_id === id);
+}
 function drawShape(id) {
   const coords = shapeMap[id];
   if (!coords) {
@@ -95,3 +103,4 @@ loadstops();
 map.on("zoomend", loadBuses);
 loadBuses();
 setInterval(loadBuses, 15000); // refresh every 15 seconds
+//PUT IDS AND STOPS IN EJS
