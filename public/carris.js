@@ -47,11 +47,12 @@ async function loadBuses() {
     console.error("Failed to load buses:", e);
   }
 }
-let stops = [];
-async function loadstops() {
+//let stops = [];
+async function loadstops(withfetch=false) {
   try {
+    if(withfetch == true){
     const res = await fetch("/api/carris/stops");
-    const stops = await res.json();
+    const stops = await res.json();}
     stops.forEach((stop) => {
       console.log(stop);
       let myicon = L.icon({
@@ -70,11 +71,12 @@ async function loadstops() {
   }
 }
 let shapeMap = {};
-let routeIDS = null;
+//let routeIDS = null;
 
-async function loadShapes() {
+async function loadShapes(withfetch=false) {
+  if(withfetch==true){
   const res = await fetch("/api/carris/shapes");
-  const data = await res.json();
+  const data = await res.json();}
 
   shapeMap = data.reduce((acc, p) => {
     if (!acc[p.shape_id]) acc[p.shape_id] = [];
@@ -82,13 +84,13 @@ async function loadShapes() {
     return acc;
   }, {});
 }
-async function getIDS() {
+/*async function getIDS() {
   const res = await fetch("/api/carris/getroutesid");
   const data = await res.json();
   return (routeIDS = data);
-}
+}*/
 async function getname(id, routeids = routeIDS) {
-  filtered = rows.filter((r) => r.route_id === id);
+  filtered = routeids.filter((r) => r.route_id === id);
 }
 function drawShape(id) {
   const coords = shapeMap[id];
@@ -99,8 +101,8 @@ function drawShape(id) {
   const polyline = L.polyline(coords, { color: "blue" }).addTo(map);
   map.fitBounds(polyline.getBounds());
 }
-loadstops();
-map.on("zoomend", loadBuses);
+loadstops(false);
+//map.on("zoomend", loadBuses);
 loadBuses();
 setInterval(loadBuses, 15000); // refresh every 15 seconds
 //PUT IDS AND STOPS IN EJS

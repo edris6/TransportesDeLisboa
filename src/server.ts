@@ -200,11 +200,30 @@ export async function createServer(): Promise<Application> {
   });
 
   // Carris live map page route
-  app.get("/carris", (_req, res) => {
-    res.render("carris");
+  app.get("/carris", async (_req, res) => {
+    let stops = await getCarrisStops().catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Failed to fetch Carris stops data from db" });
+    });
+    let shapes = await getCarrisShapes().catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Failed to fetch Carris stops data from db" });
+    });
+    let ids = await getCarrisRouteId().catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Failed to fetch Carris stops data from db" });
+    });
+    res.render("carris", {
+      stops,
+      shapes,
+      ids,
+    });
   });
 
-  app.get("/api/carris/stops", async (_req, res) => {
+  /*app.get("/api/carris/stops", async (_req, res) => {
     let stops = await getCarrisStops().catch((err) => {
       res
         .status(500)
@@ -221,12 +240,12 @@ export async function createServer(): Promise<Application> {
     res.json(shapes);
   });
   app.get("/api/carris/getroutesid", async (_req, res) => {
-    let shapes = await getCarrisRouteId().catch((err) => {
+    let ids = await getCarrisRouteId().catch((err) => {
       res
         .status(500)
         .json({ error: "Failed to fetch Carris stops data from db" });
     });
-    res.json(shapes);
-  });
+    res.json(ids);
+  });*/
   return app;
 }
