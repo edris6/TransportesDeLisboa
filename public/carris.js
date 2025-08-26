@@ -76,8 +76,10 @@ let shapeMap = {};
 async function loadShapes(withfetch=false) {
   if(withfetch==true){
   const res = await fetch("/api/carris/shapes");
-  const data = await res.json();}
-
+  let data = await res.json();}
+    if (withfetch== false){
+      data = shapes
+    }
   shapeMap = data.reduce((acc, p) => {
     if (!acc[p.shape_id]) acc[p.shape_id] = [];
     acc[p.shape_id].push([p.lat, p.lon]);
@@ -101,8 +103,13 @@ function drawShape(id) {
   const polyline = L.polyline(coords, { color: "blue" }).addTo(map);
   map.fitBounds(polyline.getBounds());
 }
+function getcomplexid(short_id, routeids = routeIDS){
+  let filtered = routeids.filter((r) => r.route_short_name === short_id);
+  return filtered
+}
 loadstops(false);
+loadShapes(false)
 //map.on("zoomend", loadBuses);
-loadBuses();
-setInterval(loadBuses, 15000); // refresh every 15 seconds
-//PUT IDS AND STOPS IN EJS
+//loadBuses();
+//setInterval(loadBuses, 15000); // refresh every 15 seconds
+
