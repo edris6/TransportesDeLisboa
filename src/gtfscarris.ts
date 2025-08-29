@@ -63,6 +63,7 @@ export async function getCarrisRouteId() {
   SELECT DISTINCT
     t.route_id,
     t.shape_id,
+    t.direction_id,
     r.route_short_name,
     r.route_long_name
   FROM trips t

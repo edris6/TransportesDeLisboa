@@ -100,6 +100,15 @@ function drawShape(id) {
     alert("Shape not found");
     return;
   }
+
+  // Clear previous shapes (polylines)
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Polyline) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Draw the new shape
   const polyline = L.polyline(coords, { color: "blue" }).addTo(map);
   map.fitBounds(polyline.getBounds());
 }
@@ -107,9 +116,48 @@ function getcomplexid(short_id, routeids = routeIDS){
   let filtered = routeids.filter((r) => r.route_short_name === short_id);
   return filtered
 }
+function getRouteName(route) {
+  const { route_long_name, shape_id } = route;
+
+  if (shape_id.includes('CIRC')) {
+    return route_long_name;
+  }
+
+  const [start, end] = route_long_name.split(' - ');
+
+  if (shape_id.includes('ASC')) {
+    return `${start} - ${end}`;
+  } else if (shape_id.includes('DESC')) {
+    return `${end} - ${start}`;
+  }
+
+  return route_long_name;
+}
 loadstops(false);
 loadShapes(false)
 //map.on("zoomend", loadBuses);
 //loadBuses();
 //setInterval(loadBuses, 15000); // refresh every 15 seconds
+document.addEventListener("keydown", function(event){
+  if (document.activeElement === document.getElementById('searchInput')){
+    document.getElementById("optionsList").innerHTML = ''
+    if(event.key == "Enter"){
+      const result = getcomplexid(document.getElementById("searchInput").value)    
+      document.getElementById('optionsList').classList.add('active'); // Show the list
+      for(let i = 0; i < result.length; i++){
+        const newElement = document.createElement('li');
 
+        newElement.id = result[i].shape_id;
+
+        // Optionally, set some content inside the new element
+        newElement.textContent = getRouteName(result[i]);
+
+        newElement.addEventListener('click', function(event) {
+          drawShape(event.target.id); 
+        });
+        document.getElementById('optionsList').appendChild(newElement); 
+        console.log(getRouteName(result[i]));
+      }
+    }
+  }
+})
