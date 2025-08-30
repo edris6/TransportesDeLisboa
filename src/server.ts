@@ -181,16 +181,19 @@ export async function createServer(): Promise<Application> {
         console.log("The file was saved!");
     }); */
       const vehicles = message.entity
-        //@ts-ignore
-        .filter((e) => e.vehicle)
-        //@ts-ignore
-        .map((v) => ({
-          id: v.id,
-          lat: v.vehicle.position.latitude,
-          lon: v.vehicle.position.longitude,
-          routeId: v.vehicle.trip.routeId,
-          current_stop_sequence: v.current_stop_sequence ?? null,
-        }));
+      //@ts-ignore
+  .filter((e) => e.vehicle)
+  //@ts-ignore
+  .map((v) => ({
+    id: v.id,
+    lat: v.vehicle.position.latitude,
+    lon: v.vehicle.position.longitude,
+    routeId: v.vehicle.trip.routeId,
+    current_stop_sequence: v.vehicle.currentStopSequence ?? null,
+    current_status: v.vehicle.currentStatus ?? null,
+    direction_id: v.vehicle.trip.directionId ?? null,
+  }));
+
 
       res.json(vehicles);
     } catch (err) {

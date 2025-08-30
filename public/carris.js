@@ -9,7 +9,7 @@ L.tileLayer(
     maxZoom: 19,
   },
 ).addTo(map);
-
+let current_route_ids = []
 let bmarkers = [];
 function getBusIconSize() {
   const zoom = map.getZoom();
@@ -18,7 +18,7 @@ function getBusIconSize() {
   return [20 * scale, 40 * scale];
 }
 
-async function loadBuses() {
+async function loadBuses(onlywhenshape = true) {
   // Clear old bmarkers
   bmarkers.forEach((m) => map.removeLayer(m));
   bmarkers = [];
@@ -28,7 +28,11 @@ async function loadBuses() {
     const buses = await res.json();
 
     buses.forEach((bus) => {
-      //console.log(bus);
+      if (onlywhenshape === true) {
+        if (!current_route_ids.includes(bus.routeId)) {
+          return; 
+        }
+      }
       let myicon = L.icon({
         iconUrl: "busicon-removebg-preview.png",
         iconSize: getBusIconSize(),
@@ -40,7 +44,7 @@ async function loadBuses() {
       });
       const marker = L.marker([bus.lat, bus.lon], { icon: myicon })
         .addTo(map)
-        .bindPopup(`Bus ${bus.id} - Route ${bus.routeId}`);
+        .bindPopup(`Bus ${bus.id} - Route ${getRouteName_based_on_route_id( bus.routeId,bus.direction_id)}`);
       bmarkers.push(marker);
     });
   } catch (e) {
@@ -116,6 +120,22 @@ function getcomplexid(short_id, routeids = routeIDS){
   let filtered = routeids.filter((r) => r.route_short_name === short_id);
   return filtered
 }
+function getRouteName_based_on_route_id(route_id, direction_id) {
+ 
+  const route = routeIDS.find(r => r.route_id === route_id);
+  
+  if (!route) return null; 
+  
+  const { route_long_name } = route;
+
+
+  if (direction_id === 1) {
+    const [start, end] = route_long_name.split(' - ');
+    return `${end} - ${start}`;
+  }
+
+  return route_long_name;  
+}
 function getRouteName(route) {
   const { route_long_name, shape_id } = route;
 
@@ -137,16 +157,17 @@ loadstops(false);
 loadShapes(false)
 //map.on("zoomend", loadBuses);
 //loadBuses();
-//setInterval(loadBuses, 15000); // refresh every 15 seconds
+setInterval(loadBuses, 15000); // refresh every 15 seconds
 document.addEventListener("keydown", function(event){
   if (document.activeElement === document.getElementById('searchInput')){
     document.getElementById("optionsList").innerHTML = ''
     if(event.key == "Enter"){
       const result = getcomplexid(document.getElementById("searchInput").value)    
       document.getElementById('optionsList').classList.add('active'); // Show the list
+      current_route_ids = []
       for(let i = 0; i < result.length; i++){
         const newElement = document.createElement('li');
-
+        current_route_ids.push(result[i].route_id)
         newElement.id = result[i].shape_id;
 
         // Optionally, set some content inside the new element
