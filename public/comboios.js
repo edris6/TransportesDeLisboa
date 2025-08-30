@@ -177,14 +177,14 @@ function managetrips(innerHTML, previnnerhtml_ = 0) {
   }
 }
 function seestops(event) {
-  console.log(event.originalTarget.id);
+  const id_button = event.target.id;
   previnnerhtml = document.getElementById("trips").innerHTML;
   managetrips("");
   let prevbutton = document.createElement("button");
   prevbutton.textContent = "goback";
   prevbutton.addEventListener("click", (event) => managetrips(0, 1));
   document.getElementById("trips").appendChild(prevbutton);
-  tripsrequest(event.originalTarget.id)
+  tripsrequest(id_button)
     .then((data) => {
       console.log("Received data:", data);
       displaydata(data, true);
