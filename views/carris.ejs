@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Carris Live Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="./search_bar.css" />
+  <style>
+    #map { height: 100vh; margin: 0; padding: 0; }
+    body, html { height: 100%; margin: 0; }
+  </style>
+  <script>
+    let routeIDS = <%- JSON.stringify(ids) %>;
+    let shapes = <%- JSON.stringify(shapes) %>;
+    let stops = <%- JSON.stringify(stops) %>;
+  </script>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="search-container">
+    <input class="search-bar" type="text" id="searchInput" placeholder="Search...">
+    <ul class="options" id="optionsList">
+      <!-- Options will appear here -->
+    
+      <!--<li>Option 2</li>
+      <li>Option 3</li>
+      <li>Option 4</li>-->
+    </ul>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="carris.js"></script>
+</body>
+</html>

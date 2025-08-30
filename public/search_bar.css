@@ -1,0 +1,63 @@
+body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #map {
+      height: 100%; /* Make the map fill the entire page */
+      width: 100%;
+    }
+
+    .search-container {
+      position: fixed; /* Fixed position for overlaying */
+      top: 20px; /* Distance from the top */
+      left: 20px; /* Distance from the left */
+      width: 300px;
+      z-index: 9999; /* High z-index to be on top of the map */
+      background-color: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .search-bar {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    .search-bar:focus {
+      border-color: #5e9ed6;
+    }
+
+    .options {
+      display: none;
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .options li {
+      padding: 10px;
+      cursor: pointer;
+      list-style: none;
+      background-color: white;
+    }
+
+    .options li:hover {
+      background-color: #f1f1f1;
+    }
+
+    .options.active {
+      display: block;
+    }
