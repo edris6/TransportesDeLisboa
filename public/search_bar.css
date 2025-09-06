@@ -10,16 +10,17 @@ body, html {
     }
 
     .search-container {
-      position: fixed; /* Fixed position for overlaying */
-      top: 20px; /* Distance from the top */
-      left: 20px; /* Distance from the left */
-      width: 300px;
-      z-index: 9999; /* High z-index to be on top of the map */
-      background-color: white;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
+  position: absolute; /* was 'fixed' before */
+  top: 20px;
+  left: 20px;
+  width: 300px;
+  z-index: 9999;
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
 
     .search-bar {
       width: 100%;

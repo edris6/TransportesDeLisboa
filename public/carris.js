@@ -115,6 +115,7 @@ function drawShape(id) {
   // Draw the new shape
   const polyline = L.polyline(coords, { color: "blue" }).addTo(map);
   map.fitBounds(polyline.getBounds());
+  loadBuses();
 }
 function getcomplexid(short_id, routeids = routeIDS){
   let filtered = routeids.filter((r) => r.route_short_name === short_id);
