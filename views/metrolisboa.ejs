@@ -2,9 +2,10 @@
 <html>
 
 <head>
-  <link rel="stylesheet" href="default.css">
-  <link rel="stylesheet" href="metrolisboa.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="default.css" />
+  <link rel="stylesheet" href="metrolisboa.css" />
   <script>
     let available_metro_stations = '<%= available_station_metro %>';
     available_metro_stations = available_metro_stations.split(',');
@@ -16,17 +17,16 @@
   <div class="header">
     <a href="/" class="logo">TransportesDeLisboa</a>
     <div class="header-right">
-      <!-- class: "active"-->
-      <a href="">Home</a>
-      <a href="">Contact</a>
-      <a href="">About</a>
+      <a href="#">Home</a>
+      <a href="#">Contact</a>
+      <a href="#">About</a>
     </div>
   </div>
   <div class="header_status">
-    <a class="logo">Linha amarela:<%= metrostatus.amarela %></a>
-    <a class="logo">Linha azul:<%= metrostatus.azul %></a>
-    <a class="logo">Linha verde:<%= metrostatus.verde %></a>
-    <a class="logo">Linha vermelha:<%= metrostatus.vermelha %></a>
+    <a class="status-item">Linha amarela: <%= metrostatus.amarela %></a>
+    <a class="status-item">Linha azul: <%= metrostatus.azul %></a>
+    <a class="status-item">Linha verde: <%= metrostatus.verde %></a>
+    <a class="status-item">Linha vermelha: <%= metrostatus.vermelha %></a>
   </div>
   <div class="metro-form">
     <div class="form-group">
@@ -39,10 +39,6 @@
     <button id="send">Send</button>
   </div>
 
-
-
-
+  <script async src="metrolisboa.js"></script>
 </body>
-<script async src="metrolisboa.js"></script>
-
 </html>
