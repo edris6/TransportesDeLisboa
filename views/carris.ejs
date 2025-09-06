@@ -2,12 +2,11 @@
 <html>
 <head>
   <title>Carris Live Map</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="./search_bar.css" />
-  <style>
-    #map { height: 100vh; margin: 0; padding: 0; }
-    body, html { height: 100%; margin: 0; }
-  </style>
+  <link rel="stylesheet" href="search_bar.css" />
+  <link rel="stylesheet" href="default.css" />
   <script>
     let routeIDS = <%- JSON.stringify(ids) %>;
     let shapes = <%- JSON.stringify(shapes) %>;
@@ -15,16 +14,24 @@
   </script>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="search-container">
-    <input class="search-bar" type="text" id="searchInput" placeholder="Search...">
-    <ul class="options" id="optionsList">
-      <!-- Options will appear here -->
-    
-      <!--<li>Option 2</li>
-      <li>Option 3</li>
-      <li>Option 4</li>-->
-    </ul>
+  <div class="header">
+    <a href="/" class="logo">TransportesDeLisboa</a>
+    <div class="header-right">
+      <a href="#">Home</a>
+      <a href="#">Contact</a>
+      <a href="#">About</a>
+    </div>
+  </div>
+
+  <div class="map-container">
+    <div id="map"></div>
+
+    <div class="search-container">
+      <input class="search-bar" type="text" id="searchInput" placeholder="Search...">
+      <ul class="options" id="optionsList">
+        <!-- Options appear here -->
+      </ul>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
