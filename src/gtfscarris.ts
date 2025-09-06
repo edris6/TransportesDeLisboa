@@ -18,7 +18,7 @@ export async function createCarrisGtfs(): Promise<true | Error> {
 
 async function openCarrisDb() {
   return open({
-    filename: "./gtfs",
+    filename: "./carris-gtfs",
     driver: sqlite3.Database,
   });
 }

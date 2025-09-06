@@ -3,5 +3,5 @@
 /package-lock.json
 /dist
 master-key.json
-gtfs
+*-gtfs
 print.txt

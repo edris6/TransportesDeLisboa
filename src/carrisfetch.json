@@ -1,5 +1,5 @@
 {
-  "sqlitePath": "./gtfs",  
+  "sqlitePath": "./carris-gtfs",  
   "agencies": [
       {
         "url": "https://gateway.carris.pt/gateway/gtfs/api/v2.8/GTFS",
