@@ -1,28 +1,46 @@
 let previnnerhtml = "";
 
-function getstation(id) {
+function getstation(id,date =new Date().toLocaleDateString('en-CA'),     start = new Date().toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' }),    useProxy = false,       
+  
+)  {
   previnnerhtml = "";
   //const train_station = document.getElementById("station1").value;
 
-  fetch(
-    window.location.origin +
-      "/proxy?url=https://www.cp.pt/sites/spring/station/trains?stationId=" +
-      id,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      /*body: JSON.stringify({
-        station: train_station,
-      }),*/
+  
+  const path = `/cp/services/travel-api/stations/${encodeURIComponent(
+    id
+  )}/timetable/${date}?start=${start}`;
+  console.log(path)
+  const rawUrl = `https://api-gateway.cp.pt${path}`;
+
+  // opcional: via proxy local para evitar CORS
+  const url = useProxy
+    ? `${window.location.origin}/proxy?url=${encodeURIComponent(rawUrl)}`
+    : rawUrl;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      // só precisa destes; Content-Type não é necessário em GET
+      "x-api-key": "ca3923e4-1d3c-424f-a3d0-9554cf3ef859",
+      "x-cp-connect-id": "1483ea620b920be6328dcf89e808937a",
+      "x-cp-connect-secret": "74bd06d5a2715c64c2f848c5cdb56e6b",
+      // "Accept": "application/json", // opcional
     },
-  )
-    .then((response) => response.json())
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.text().then((t) => {
+          throw new Error(`HTTP ${res.status} – ${res.statusText}\n${t}`);
+        });
+      }
+      console.log(res);
+      return res.json();
+    })
     .then((data) => {
-      console.log(data);
+      console.log(data.stationStops);
       managetrips("");
-      displaydata(data, false);
+      displaydata(data.stationStops, false);
     })
     .catch((error) => {
       managetrips("ERROR");
