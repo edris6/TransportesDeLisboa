@@ -5,6 +5,7 @@ import {
   available_stations_request,
   available_destinos,
 } from "./metrolisboa.mjs";
+import { getNextTrams } from "./mts.js";
 //@ts-ignore
 import cors from "cors";
 import path from "path";
@@ -225,7 +226,31 @@ export async function createServer(): Promise<Application> {
       ids,
     });
   });
+  app.post("/api/mts/nexttrams", async (_req, res) => {
+    const data = _req.body;
+      //print(req.body);
+      if (!data) {
+        //@ts-ignore
+        return res.status(400).json({ error: "I need station name" });
+      }
+      if (!validateStationData(data)) {
+        //@ts-ignore
+        return res
+          .status(400)
+          .json({ error: "Wrong data structure or station is not a string" });
+      }
+    
+    
+    const {result, error} = await getNextTrams(data.station);
+    if (error) {
+      return res
+          .status(500)
+          .json({ error:error});
+    }
+    res.json(result);
 
+  
+  });
   /*app.get("/api/carris/stops", async (_req, res) => {
     let stops = await getCarrisStops().catch((err) => {
       res

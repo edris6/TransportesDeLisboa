@@ -1,15 +1,16 @@
 import { importGtfs } from "gtfs";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
+import { format } from "date-fns";
 
 const mts_config = {
   sqlitePath: "./mts-gtfs",
   agencies: [
     {
-    //check for more recent ones 
-      url: "https://mts.pt/imt/MTS-20240129.zip"
-    }
-  ]
+      // check for more recent ones
+      url: "https://mts.pt/imt/MTS-20240129.zip",
+    },
+  ],
 };
 
 export async function createMtsGtfs(): Promise<true | Error> {
@@ -28,134 +29,210 @@ async function openMtsDb() {
   });
 }
 
-type NextTramsParams = {
-  routeShortName?: string | null;
-  routeId?: string | null;
-  stopIds: string[];        // at least one
-  date: string;             // "YYYY-MM-DD"
-  time: string;             // "HH:MM:SS"
-  limit?: number;
+/** Decide DS_inverno vs DS_verao from month/day using windows learned from calendar table */
+function pickSeasonByMonthDay(
+  dateISO: string,
+  learned?: { veraoStart?: string; veraoEnd?: string }
+): "DS_inverno" | "DS_verao" {
+  const [, mStr, dStr] = dateISO.split("-");
+  const md = `${mStr}-${dStr}`; // MM-DD
+  const veraoStart = learned?.veraoStart || "07-15";
+  const veraoEnd = learned?.veraoEnd || "09-07";
+  const inRange = (x: string, start: string, end: string) => start <= x && x <= end;
+  return inRange(md, veraoStart, veraoEnd) ? "DS_verao" : "DS_inverno";
+}
+
+type TramTrip = {
+  trip_id: string;
+  route_id: string;
+  route_short_name: string | null;
+  route_long_name: string | null;
+  headsign: string | null;
+  departure_time: string;
 };
 
-function toSeconds(hhmmss: string): number {
-  const [h, m, s] = hhmmss.split(":").map(Number);
-  return h * 3600 + m * 60 + s;
+export type TramResult = {
+  station: string;
+  date: string;
+  time: string;
+  limit: number;
+  trips: TramTrip[];
+  usedSeasonalFallback: boolean;
+  inferredSeason?: "DS_inverno" | "DS_verao" | "SAB" | "DOM";
+  activeServiceIds: string[];
+  note?: string;
+};
+
+
+
+
+/**
+ * Get next trams for a station and date/time.
+ * Normal path: calendar + calendar_dates.
+ * Fallback: infer DS_inverno/DS_verao (or SAB/DOM) if calendar is missing the period.
+ */
+export async function getNextTrams(
+  stationName: string,
+  date?: string,
+  time?: string,
+  limit: number = 5
+): Promise<{ result?: TramResult; error?: string }> {
+  try {
+    const db = await openMtsDb();
+    try {
+      const now = new Date();
+      const currentDate = date || format(now, "yyyy-MM-dd");
+      const currentTime = time || format(now, "HH:mm:ss");
+      const yyyymmdd = currentDate.replace(/-/g, "");
+
+      // 1️⃣ Exact station match (case-insensitive)
+      const normalizedName = stationName.trim().toLowerCase();
+      const stop = await db.get<{ stop_id: string }>(
+        `SELECT stop_id FROM stops WHERE LOWER(stop_name) = ? COLLATE NOCASE LIMIT 1`,
+        [normalizedName]
+      );
+      if (!stop)
+        return { error: `No stop found with exact name "${stationName}"` };
+
+      // 2️⃣ Active services
+      const base: Array<{ service_id: string }> = await db.all(
+        `SELECT service_id FROM calendar
+         WHERE CAST(? AS INTEGER) BETWEEN start_date AND end_date
+         AND CASE strftime('%w', ?) 
+           WHEN '0' THEN sunday
+           WHEN '1' THEN monday
+           WHEN '2' THEN tuesday
+           WHEN '3' THEN wednesday
+           WHEN '4' THEN thursday
+           WHEN '5' THEN friday
+           WHEN '6' THEN saturday
+         END = 1`,
+        [yyyymmdd, currentDate]
+      );
+
+      const added: Array<{ service_id: string }> = await db.all(
+        `SELECT service_id FROM calendar_dates WHERE date = ? AND exception_type = 1`,
+        [yyyymmdd]
+      );
+      const removed: Array<{ service_id: string }> = await db.all(
+        `SELECT service_id FROM calendar_dates WHERE date = ? AND exception_type = 2`,
+        [yyyymmdd]
+      );
+
+      const active = new Set<string>(base.map((r) => r.service_id));
+      for (const r of added) active.add(r.service_id);
+      for (const r of removed) active.delete(r.service_id);
+
+      let usedSeasonalFallback = false;
+      let inferredSeason: "DS_inverno" | "DS_verao" | "SAB" | "DOM" | undefined;
+
+      // 3️⃣ Fallback to DS_inverno/DS_verao if needed
+      if (active.size === 0) {
+        usedSeasonalFallback = true;
+
+        const weekdayRow = await db.get<{ d: string }>(
+          `SELECT strftime('%w', ?) AS d`,
+          [currentDate]
+        );
+        const weekday = Number(weekdayRow?.d ?? "0"); // 0=Sun..6=Sat
+
+        if (weekday === 0) inferredSeason = "DOM";
+        else if (weekday === 6) inferredSeason = "SAB";
+        else {
+          const veraoRow = await db.get<{ start_date: number; end_date: number }>(
+            `SELECT start_date, end_date FROM calendar
+             WHERE LOWER(service_id) = 'ds_verao'
+             ORDER BY end_date DESC LIMIT 1`
+          );
+
+          const toMMDD = (yyyymmddNum?: number) =>
+            yyyymmddNum
+              ? `${String(Math.floor((yyyymmddNum % 10000) / 100)).padStart(
+                  2,
+                  "0"
+                )}-${String(yyyymmddNum % 100).padStart(2, "0")}`
+              : undefined;
+
+          const learned = veraoRow
+            ? { veraoStart: toMMDD(veraoRow.start_date), veraoEnd: toMMDD(veraoRow.end_date) }
+            : undefined;
+
+          inferredSeason = pickSeasonByMonthDay(currentDate, learned);
+        }
+
+        const seasonRemoved = await db.get<{ x: number }>(
+          `SELECT 1 AS x FROM calendar_dates
+           WHERE service_id = ? AND date = ? AND exception_type = 2 LIMIT 1`,
+          [inferredSeason, yyyymmdd]
+        );
+
+        if (!seasonRemoved && inferredSeason) active.add(inferredSeason);
+        for (const r of added) active.add(r.service_id);
+      }
+
+      if (active.size === 0) {
+        return {
+          result: {
+            station: stationName,
+            date: currentDate,
+            time: currentTime,
+            limit,
+            trips: [],
+            usedSeasonalFallback,
+            inferredSeason,
+            activeServiceIds: [],
+            note:
+              "No active services for this date in calendar; fallback also empty.",
+          },
+        };
+      }
+
+      // 4️⃣ Next departures
+      const activeList = [...active];
+      const placeholders = activeList.map(() => "?").join(",");
+      const trips: Array<TramTrip> = await db.all(
+        `
+        SELECT 
+          t.trip_id,
+          t.route_id,
+          r.route_short_name,
+          r.route_long_name,
+          COALESCE(t.trip_headsign, r.route_long_name) AS headsign,
+          st.departure_time
+        FROM stop_times st
+        JOIN trips t ON st.trip_id = t.trip_id
+        JOIN routes r ON t.route_id = r.route_id
+        WHERE st.stop_id = ?
+          AND t.service_id IN (${placeholders})
+          AND st.departure_time > ?
+        ORDER BY st.departure_time ASC
+        LIMIT ?
+        `,
+        [stop.stop_id, ...activeList, currentTime, limit]
+      );
+
+      const result: TramResult = {
+        station: stationName,
+        date: currentDate,
+        time: currentTime,
+        limit,
+        trips,
+        usedSeasonalFallback,
+        inferredSeason,
+        activeServiceIds: activeList,
+      };
+
+      return { result };
+    } finally {
+      await db.close();
+    }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
-export async function getNextTrams({
-  routeShortName = null,
-  routeId = null,
-  stopIds,
-  date,
-  time,
-  limit = 8,
-}: NextTramsParams) {
-  if (!date || !time) throw new Error("Please provide `date` and `time`.");
-  if (!routeShortName && !routeId)
-    throw new Error("Provide either `routeShortName` or `routeId`.");
-  if (!stopIds || stopIds.length === 0)
-    throw new Error("Provide at least one GTFS `stop_id`.");
 
-  const db = await openMtsDb();
-
-  const sql = `
-WITH
-active_from_calendar AS (
-  SELECT service_id
-  FROM calendar
-  WHERE REPLACE(:service_date,'-','') BETWEEN start_date AND end_date
-    AND CASE strftime('%w', :service_date)
-        WHEN '0' THEN sunday
-        WHEN '1' THEN monday
-        WHEN '2' THEN tuesday
-        WHEN '3' THEN wednesday
-        WHEN '4' THEN thursday
-        WHEN '5' THEN friday
-        WHEN '6' THEN saturday
-      END = 1
-),
-removed AS (
-  SELECT service_id
-  FROM calendar_dates
-  WHERE date = REPLACE(:service_date,'-','')
-    AND exception_type = 2
-),
-added AS (
-  SELECT service_id
-  FROM calendar_dates
-  WHERE date = REPLACE(:service_date,'-','')
-    AND exception_type = 1
-),
-active_services AS (
-  (SELECT service_id FROM active_from_calendar
-   EXCEPT
-   SELECT service_id FROM removed)
-  UNION
-  SELECT service_id FROM added
-),
-route_filter AS (
-  SELECT route_id
-  FROM routes
-  WHERE (:route_id IS NOT NULL AND route_id = :route_id)
-     OR (:route_short_name IS NOT NULL AND route_short_name = :route_short_name)
-),
-st AS (
-  SELECT
-    stop_times.trip_id,
-    stop_times.stop_id,
-    stop_times.stop_sequence,
-    stop_times.departure_time AS departure_time,
-    (
-      CAST(substr(stop_times.departure_time,1,2) AS INT) * 3600 +
-      CAST(substr(stop_times.departure_time,4,2) AS INT) * 60 +
-      CAST(substr(stop_times.departure_time,7,2) AS INT)
-    ) AS departure_sec
-  FROM stop_times
-  WHERE stop_times.stop_id IN (SELECT value FROM json_each(:stop_ids_json))
-)
-SELECT
-  routes.route_id,
-  routes.route_short_name,
-  trips.trip_id,
-  trips.direction_id,
-  trips.service_id,
-  trips.trip_headsign,
-  st.stop_id,
-  (SELECT stop_name FROM stops s WHERE s.stop_id = st.stop_id) AS stop_name,
-  st.stop_sequence,
-  st.departure_time,
-  st.departure_sec
-FROM st
-JOIN trips  ON trips.trip_id  = st.trip_id
-JOIN routes ON routes.route_id = trips.route_id
-WHERE trips.service_id IN (SELECT service_id FROM active_services)
-  AND trips.route_id   IN (SELECT route_id FROM route_filter)
-  AND st.departure_sec >= :time_sec
-ORDER BY st.departure_sec ASC
-LIMIT :limit;
-`;
-
-  const params = {
-    service_date: date,
-    time_sec: toSeconds(time),
-    stop_ids_json: JSON.stringify(stopIds),
-    route_id: routeId,
-    route_short_name: routeShortName,
-    limit,
-  };
-
-  const rows: any[] = await db.all(sql, params);
-  db.close();
-  return rows.map((r) => ({
-    routeId: r.route_id,
-    routeShortName: r.route_short_name,
-    tripId: r.trip_id,
-    directionId: r.direction_id,
-    headsign: r.trip_headsign,
-    stopId: r.stop_id,
-    stopName: r.stop_name,
-    stopSequence: r.stop_sequence,
-    departureTime: r.departure_time, // can be "24:15:00"
-    secondsAfterMidnight: r.departure_sec,
-  }));
-}
+// Example run (use top-level await in ESM or wrap in an IIFE)
+/*;(async () => {
+  console.log(await getNextTrams("s", "2025-10-28", "14:00:00"));
+})();*/
