@@ -127,7 +127,7 @@ export async function createServer(): Promise<Application> {
       }
     },
   );
-  app.get(
+  /*app.get(
     "/proxy",
     async (
       req: Request<{}, any, any, ProxyQuery>,
@@ -155,7 +155,7 @@ export async function createServer(): Promise<Application> {
         }
       }
     },
-  );
+  );*/
   // ----------- Carris live bus data API ------------
 
   app.get("/api/carris/live", async (_req, res) => {

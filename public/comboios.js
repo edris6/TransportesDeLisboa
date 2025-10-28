@@ -1,28 +1,46 @@
 let previnnerhtml = "";
 
-function getstation(id) {
+function getstation(id,date =new Date().toLocaleDateString('en-CA'),     start = new Date().toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit' }),    useProxy = false,       
+  
+)  {
   previnnerhtml = "";
   //const train_station = document.getElementById("station1").value;
 
-  fetch(
-    window.location.origin +
-      "/proxy?url=https://www.cp.pt/sites/spring/station/trains?stationId=" +
-      id,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      /*body: JSON.stringify({
-        station: train_station,
-      }),*/
+  
+  const path = `/cp/services/travel-api/stations/${encodeURIComponent(
+    id
+  )}/timetable/${date}?start=${start}`;
+  console.log(path)
+  const rawUrl = `https://api-gateway.cp.pt${path}`;
+
+  // opcional: via proxy local para evitar CORS
+  const url = useProxy
+    ? `${window.location.origin}/proxy?url=${encodeURIComponent(rawUrl)}`
+    : rawUrl;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      // só precisa destes; Content-Type não é necessário em GET
+      "x-api-key": "ca3923e4-1d3c-424f-a3d0-9554cf3ef859",
+      "x-cp-connect-id": "1483ea620b920be6328dcf89e808937a",
+      "x-cp-connect-secret": "74bd06d5a2715c64c2f848c5cdb56e6b",
+      // "Accept": "application/json", // opcional
     },
-  )
-    .then((response) => response.json())
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.text().then((t) => {
+          throw new Error(`HTTP ${res.status} – ${res.statusText}\n${t}`);
+        });
+      }
+      console.log(res);
+      return res.json();
+    })
     .then((data) => {
-      console.log(data);
+      console.log(data.stationStops);
       managetrips("");
-      displaydata(data, false);
+      displaydata(data.stationStops, false);
     })
     .catch((error) => {
       managetrips("ERROR");
@@ -32,28 +50,42 @@ function getstation(id) {
 /**
  * fetches trips
  */
-function tripsrequest(id) {
-  return fetch(
-    window.location.origin +
-      "/proxy?url=https://www.cp.pt/sites/spring/station/trains/train?trainId=" +
-      id,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      /*body: JSON.stringify({
-        station: id,
-      }),*/
+function tripsrequest(
+  trainId,
+  { 
+    date = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Lisbon" }).format(new Date()), 
+    useProxy = false 
+  } = {}
+) {
+  const path = `/cp/services/travel-api/trains/${encodeURIComponent(trainId)}/timetable/${date}`;
+  const rawUrl = `https://api-gateway.cp.pt${path}`;
+  const url = useProxy
+    ? `${window.location.origin}/proxy?url=${encodeURIComponent(rawUrl)}`
+    : rawUrl;
+
+  return fetch(url, {
+    method: "GET",
+    headers: {
+      "x-api-key": "ca3923e4-1d3c-424f-a3d0-9554cf3ef859",
+      "x-cp-connect-id": "1483ea620b920be6328dcf89e808937a",
+      "x-cp-connect-secret": "74bd06d5a2715c64c2f848c5cdb56e6b",
     },
-  )
-    .then((response) => response.json())
+  })
+    .then((res) => {
+      if (!res.ok) {
+        return res.text().then((txt) => {
+          throw new Error(`HTTP ${res.status} – ${res.statusText}\n${txt}`);
+        });
+      }
+      return res.json();
+    })
     .then((data) => {
+      console.log(`✅ Train ${trainId} timetable for ${date}:`, data);
       return data;
     })
-    .catch((error) => {
-      console.error("Error:", error);
-      throw error;
+    .catch((err) => {
+      console.error("❌ Error fetching train timetable:", err);
+      throw err;
     });
 }
 /**
@@ -86,14 +118,14 @@ function displaydata(data, istrip) {
       if (data[i].arrivalTime == null) {
         arrival = data[i].departureTime;
       }
-      if (data[i].delay != null) {
-        if (data[i].delay != 0) {
+      if (data[i].delay != null){
+        
           if (data[i].arrivalTime == null) {
-            arrival = arrival + "(" + data[i].etd + ")";
+            arrival = arrival + "(" + data[i].ETD + ")";
           } else {
-            arrival = arrival + "(" + data[i].eta + ")";
+            arrival = arrival + "(" + data[i].ETA + ")";
           }
-        }
+        
       }
       platform = data[i].platform;
       tripId = data[i].trainNumber;
@@ -106,13 +138,13 @@ function displaydata(data, istrip) {
         arrival = data.trainStops[i].departure;
       }
       if (data.trainStops[i].delay != null) {
-        if (data.trainStops[i].delay != 0) {
+        
           if (data.trainStops[i].arrival == null) {
-            arrival = arrival + "(" + data.trainStops[i].etd + ")";
+            arrival = arrival + "(" + data.trainStops[i].ETD + ")";
           } else {
-            arrival = arrival + "(" + data.trainStops[i].eta + ")";
+            arrival = arrival + "(" + data.trainStops[i].ETA + ")";
           }
-        }
+        
       }
       platform = data.trainStops[i].platform;
     }
